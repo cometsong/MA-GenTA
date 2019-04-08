@@ -1,0 +1,42 @@
+#==============================================================================#
+#---------     Options for Steps in Targeted Probe Design Pipeline     --------#
+#==============================================================================#
+
+[general]
+  final_probe_amount = 10
+
+  fields = 'qsseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
+  comments.fields = 'This set of fields is significant, as some are used in filtering! Feel free to add others, but take care in any deletions!'
+  
+[paths]
+  comments.paths = 'Use direct path if all files together, or glob to match within all subdirs. Paths can be absolute or relative.'
+  working_dir = 'results'
+  comments.working_dir = 'This is the place to work on files... (default "results")'
+  cluster_ffn = "/projects/mbiomecore/data/HL44/prokka_asaf/by_clusters/*/prokka_out/"
+  genome_bins = "/projects/mbiomecore/data/targeted/design/HLB_design/genome_bins/"
+
+[blastn]
+  evalue = 0.001
+  num_alignments = 5
+  comments_num_alignments = 'Integer >1 to check probes match multi contigs after MUSiCC sequence split.'
+
+[catch]
+  probe_length = 40
+  probe_stride = 20
+
+[gc]
+  min_percent = 45
+  max_percent = 65
+
+[regexes]
+  musicc_regex = "" #TODO: retrieve from Jacqui's file
+  trna_regex = "" #TODO: retrieve from Jacqui's file
+
+[APPS]
+  catch = './catch/bin/design.py'
+  usearch = 'usearch'
+  blastdb = 'makeblastdb'
+  blastn = 'blastn'
+  comments = '''Use only the main executable name if they are in your $PATH !
+                e.g. load the required 'module's before running this pipeline.'''
+
