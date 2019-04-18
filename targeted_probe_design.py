@@ -42,7 +42,7 @@ from probe_design_utils import (
 log.info('Loading default configuration.')
 OPTIONS = Ord(
     general = Ord(
-        final_probe_amount = 10,
+        final_probe_amount = '10',
         # fields for initial blastn output, plus for data storage
         fields = 'qsseqid sseqid pident length mismatch'
                 ' gapopen qstart qend sstart send'
@@ -54,30 +54,34 @@ OPTIONS = Ord(
     ),
     paths = Ord(
         working_dir = 'results',
-        cluster_prokka = "by_clusters/*/prokka_out/",
-        genome_bins = "genome_bins/",
+        cluster_prokka = 'by_clusters/prokka_out',
+        genome_bins = 'genome_bins',
         comments = Ord(
             working_dir = 'This is the place to work on files... (default "results")',
             paths = 'Use direct path if all files together, or glob to match within all subdirs. Paths can be absolute or relative.'
         )
     ),
     blastn = Ord(
-        evalue = 0.001,
+        evalue = '0.001',
         dust = 'no',
-        outfmt = 6, # without yucky comment header lines
-	num_alignments = 5, # for blast probes to single-copy set on contigs
+        outfmt = '6', # without yucky comment header lines
+	num_alignments = '5', # for blast probes to single-copy set on contigs
     ),
     catch = Ord(
-        probe_length = 40,
-        probe_stride = 20,
+        probe_length = '40',
+        probe_stride = '20',
         blacklists = '', #
     ),
     gc = Ord(
-        min_percent = 45,
-        max_percent = 65,
-        ),
+        min_percent = '45',
+        max_percent = '65',
+    ),
+    regexes = Ord(
+        musicc_regex = "",  #TODO: retrieve from Jacqui's file
+        trna_regex = "",    #TODO: retrieve from Jacqui's file
+    ),
     APPS = Ord(
-        catch = './catch/bin/design.py',
+        catch = 'catch_design.py',
         usearch = 'usearch',
         blastdb = 'makeblastdb',
         blastn = 'blastn',
@@ -95,19 +99,21 @@ def read_config_file(config_file=None):
     try:
         if os.path.exists(config_file):
             log.info('Reading config file: {}'.format(config_file))
+            #TODO: read the actual config file!
+            # with open(CONFIG_FILE) as cfgfile:
+            #     cfg_opts = toml.load(cfgfile, _dict=Ord)
             pass
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
+    else:
+        return cfg_opts
 
 CONFIG_FILE="probe_design.config.toml" #TODO: allow custom CONFIG_FILE as ARG
-log.info('Loading configuration changes from file ().'.format(CONFIG_FILE))
-with open(CONFIG_FILE) as cfgfile:
-    cfg_opts = toml.load(cfgfile, _dict=Ord)
-# log.warning('cfg_opts\n {}'.format(cfg_opts.get('general')))
-# log.warning('cfg_opts\n {}'.format(cfg_opts.get('paths')))
-# sys.exit(1)
-OPTIONS.update(cfg_opts)
+# log.info('Loading configuration changes from file ().'.format(CONFIG_FILE))
+# with open(CONFIG_FILE) as cfgfile:
+#     cfg_opts = toml.load(cfgfile, _dict=Ord)
+# OPTIONS.update(cfg_opts)
 #TODO: option to write out new/modidied config file?
 
 
