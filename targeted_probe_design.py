@@ -28,6 +28,7 @@ log = Logger('Target Probe')
 
 # pipeline-app modules
 from get_seqinfo import parse_seqinfo # get GC%
+from probe_design_config import OPTIONS, read_config_file
 from probe_design_utils import (
     # check_options,
     replace_spaces,
@@ -38,78 +39,8 @@ from probe_design_utils import (
 )
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~
-"""give all options default values, to be later customized in config file"""
-log.info('Loading default configuration.')
-OPTIONS = Ord(
-    general = Ord(
-        final_probe_amount = '10',
-        # fields for initial blastn output, plus for data storage
-        fields = 'qsseqid sseqid pident length mismatch'
-                ' gapopen qstart qend sstart send'
-                ' evalue bitscore',
-        prokka_prediction_suffix = 'ffn',
-        comments = Ord(
-            fields = 'This set of fields is significant, as some are used in filtering! Feel free to add others, but take care in any deletions!',
-        )
-    ),
-    paths = Ord(
-        working_dir = 'results',
-        cluster_prokka = 'by_clusters/prokka_out',
-        genome_bins = 'genome_bins',
-        comments = Ord(
-            working_dir = 'This is the place to work on files... (default "results")',
-            paths = 'Use direct path if all files together, or glob to match within all subdirs. Paths can be absolute or relative.'
-        )
-    ),
-    blastn = Ord(
-        evalue = '0.001',
-        dust = 'no',
-        outfmt = '6', # without yucky comment header lines
-	num_alignments = '5', # for blast probes to single-copy set on contigs
-    ),
-    catch = Ord(
-        probe_length = '40',
-        probe_stride = '20',
-        blacklists = '', #
-    ),
-    gc = Ord(
-        min_percent = '45',
-        max_percent = '65',
-    ),
-    regexes = Ord(
-        musicc_regex = "",  #TODO: retrieve from Jacqui's file
-        trna_regex = "",    #TODO: retrieve from Jacqui's file
-    ),
-    APPS = Ord(
-        catch = 'catch_design.py',
-        usearch = 'usearch',
-        blastdb = 'makeblastdb',
-        blastn = 'blastn',
-        comments = Ord(
-            paths = '''Use only the main executable name if they are in your $PATH !
-                    e.g. load the required 'module's before running this pipeline.''',
-        )
-    )
-)
-
-def read_config_file(config_file=None):
-    """If CONFIG_FILE exists, and readable, and in TOML format...
-    Read in the options set ther eand modify 'cfg_opts' dict.
-    """
-    try:
-        if os.path.exists(config_file):
-            log.info('Reading config file: {}'.format(config_file))
-            #TODO: read the actual config file!
-            # with open(CONFIG_FILE) as cfgfile:
-            #     cfg_opts = toml.load(cfgfile, _dict=Ord)
-            pass
-    except Exception as e:
-        log.exception('Error: {}'.format(e))
-        raise e
-    else:
-        return cfg_opts
-
-CONFIG_FILE="probe_design.config.toml" #TODO: allow custom CONFIG_FILE as ARG
+# log.info('Loading configuration from file.')
+# CONFIG_FILE="probe_design.config.toml" #TODO: allow custom CONFIG_FILE as ARG
 # log.info('Loading configuration changes from file ().'.format(CONFIG_FILE))
 # with open(CONFIG_FILE) as cfgfile:
 #     cfg_opts = toml.load(cfgfile, _dict=Ord)
