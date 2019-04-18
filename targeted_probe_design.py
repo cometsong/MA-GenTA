@@ -176,10 +176,10 @@ def get_metagenome_cluster_prokka(cluster_prokka=None, dest_dir=None, suffix='ff
             dest_files.append(shutil.copyfile(src_fn, dst_fn))
         except IOError as e:
             log.exception('IOError: {}, copying "{}" to "{}"'.format(
-                        e.strerror, e.filename, e.filename2))
+                        e, e.filename, e.filename2))
             raise e
         except Exception as e:
-            log.exception('Error: {}'.format(e.strerror))
+            log.exception('Error: {}'.format(e))
             raise e
 
     #TODO: add clusterID ('file.stem') to header line inside each .ffn file
@@ -204,7 +204,7 @@ def makeblastdb(fastaname, dest_dir=None):
                '-out', db_out]
         output = run_cmd(cmd)
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
     finally:
         return status
@@ -232,7 +232,7 @@ def make_blacklist(fasta_path, gbin_name, suffix='fasta'):
                     blck.write(bff.read())
         return blacklist
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
 
 
@@ -246,7 +246,7 @@ def make_blacklists(filepath, suffix='fasta'):
             blacklists.append( make_blacklist(fpath, fa.name) )
         return blacklists
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
 
 
