@@ -261,6 +261,8 @@ def catch_design_probes(gbin_name, gbin_path=None, dest_dir=None):
     if not dest_dir:
         dest_dir = OPTIONS.get('paths').get('working_dir')
     try:
+        catch_app = OPTIONS.get('APPS').get('catch')
+
         gbin_parts = gbin_name.split('.')
         gbin_stem = '.'.join(gbin_parts[0:-1])
         gbin_suff = gbin_parts[-1]
@@ -269,17 +271,18 @@ def catch_design_probes(gbin_name, gbin_path=None, dest_dir=None):
         gbin_probes = '.'.join([gbin_stem, 'probes', gbin_suff])
         gbin_probes_path = pjoin(dest_dir, gbin_probes)
 
-        log_file = '.'.join([gbin_stem, 'probes', 'log'])
+        log_file = '.'.join([gbin_stem, 'design_probes', 'log'])
         log_path = pjoin(dest_dir, log_file)
 
         catch_covtsv = '{}_probe_coverage_analysis.tsv'.format(gbin_stem)
         catch_covtsv_path = pjoin(dest_dir, gbin_probes)
 
-        catch_app = OPTIONS.get('APPS').get('catch')
+        opt_probe_length = OPTIONS.get('catch').get('probe_length')
+        opt_probe_stride = OPTIONS.get('catch').get('probe_stride')
         cmd = [catch_app, gbin_name,
                '--write-analysis-to-tsv', catch_covtsv_path,
-               '--probe-length', OPTIONS.get('catch').get('probe_length'),
-               '--probe-stride', OPTIONS.get('catch').get('probe_stride'),
+               '--probe-length', opt_probe_length,
+               '--probe-stride', opt_probe_stride,
                '--output-probes', gbin_probes_path,
                ]
         output = run_cmd(cmd)
