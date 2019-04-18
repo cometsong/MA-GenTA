@@ -291,7 +291,7 @@ def catch_design_probes(gbin_name, gbin_path=None, dest_dir=None):
         log.info('Prepending clusterID to seq headers in {}'.format(gbin_probes))
         sed_inplace(gbin_probes_path, r'^>', '>{}_'.format(gbin_stem))
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
     else:
         return gbin_probes_path
