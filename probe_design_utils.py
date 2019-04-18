@@ -5,7 +5,7 @@ import tempfile
 from os.path import join as pjoin
 from pathlib import Path
 
-from subprocess import run, CalledProcessError, STDOUT
+from subprocess import run, CalledProcessError, STDOUT, PIPE
 #from multiprocessing import Pool
 
 from logbook import Logger, StreamHandler
@@ -50,7 +50,7 @@ def replace_spaces(filepath, replace='_'):
         find = r' '
         sed_inplace(filepath, find, replace)
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
         raise e
     else:
         return filepath
@@ -83,21 +83,22 @@ def run_cmd(cmd=[]):
     """run the passed cmd using subprocess.run; return the 
        CompletedProcess object or raise CalledProcessError.
     """
+    log = Logger('Target:run_cmd')
     try:
         if cmd:
             log.info('Running subprocess for "{}..."'.format(cmd[0]))
-            log.debug('Run cmd: "{}"'.format(cmd[:]))
-            output = run(cmd, check=True, capture_output=True, stderr=STDOUT)
+            log.debug('Run cmd: "{}"'.format(cmd))
+            output = run(cmd, check=True, stdout=PIPE, stderr=STDOUT)
     except IndexError:
         return None
     except CalledProcessError as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.error('Error: {}'.format(e.stderr))
         raise e
     except Exception as e:
+        log.error('Error: {}'.format(e.args))
         raise e
     else:
         return output
-
 
 
 def write_log_file(log_contents, log_file, mode='w'):
@@ -108,7 +109,7 @@ def write_log_file(log_contents, log_file, mode='w'):
         with open(log_file, mode) as lf:
             lf.write(log_contents)
     except Exception as e:
-        log.exception('Error: {}'.format(e.strerror))
+        log.exception('Error: {}'.format(e))
     else:
         return log_file
 
