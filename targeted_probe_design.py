@@ -23,20 +23,20 @@ from collections import OrderedDict as Ord
 import toml
 
 from logbook import Logger, StreamHandler
-StreamHandler(sys.stdout).push_application()
-log = Logger('Target Probe')
 
 # pipeline-app modules
-from get_seqinfo import parse_seqinfo # get GC%
 from probe_design_config import OPTIONS, read_config_file
 from probe_design_utils import (
-    # check_options,
+    read_fasta,
+    pct_gc,
     replace_spaces,
     sed_inplace,
     concatenate_files,
     run_cmd,
-    write_log_file,
+    write_out_file,
 )
+
+__author__ = 'Benjamin Leopold <bleopold@jax.org>'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~
 # log.info('Loading configuration from file.')
