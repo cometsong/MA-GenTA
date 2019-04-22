@@ -125,15 +125,16 @@ def run_cmd(cmd=[]):
         return output
 
 
-def write_log_file(log_contents, log_file, mode='w'):
-    """Write content to log file.
+def write_out_file(contents, filename, mode='w'):
+    """Write contents to outfile.
     Default create new file, pass mode='a' if append to existing.
     """
     try:
-        with open(log_file, mode) as lf:
-            lf.write(log_contents)
+        with open(filename, mode) as f:
+            f.write(contents)
     except Exception as e:
         log.exception('Error: {}'.format(e))
+        return None
     else:
-        return log_file
+        return filename
 
