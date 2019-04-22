@@ -12,6 +12,31 @@ from logbook import Logger, StreamHandler
 StreamHandler(sys.stdout).push_application()
 log = Logger('Target:utils')
 
+__author__ = 'Benjamin Leopold <bleopold@jax.org>'
+
+
+def pct_gc(seq, points=2):
+    """return percent GC of sequence (2 decimal points)"""
+    seq = seq.upper()
+    return round((seq.count('G') + seq.count('C')) / len(seq) * 100, points)
+
+
+def read_fasta(fasta_file):
+    """Yield generator of header, seq lines in fasta file."""
+    name, seq = None, []
+    try:
+        with open(fasta_file, "r") as fh:
+            for line in fh:
+                line = line.rstrip()
+                if line.startswith(">"):
+                    if name: yield (name, ''.join(seq))
+                    name, seq = line, []
+                else:
+                    seq.append(line)
+            if name: yield (name, ''.join(seq))
+    except Exception as e:
+        raise e
+
 
 def sed_inplace(filename, pattern, repl):
     """
