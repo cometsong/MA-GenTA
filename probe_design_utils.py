@@ -1,14 +1,13 @@
+import os
 import sys
 import re
 import shutil
 import tempfile
-from os.path import join as pjoin
 from pathlib import Path
-
 from subprocess import run, CalledProcessError, STDOUT, PIPE
-#from multiprocessing import Pool
 
 from logbook import Logger, StreamHandler
+
 StreamHandler(sys.stdout).push_application()
 log = Logger('Target:utils')
 
