@@ -4,16 +4,25 @@
 
 [general]
   final_probe_amount = 10
+  [gc]
+    min_percent = 45
+    max_percent = 65
 
   fields = 'qsseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
-  comments.fields = 'This set of fields is significant, as some are used in filtering! Feel free to add others, but take care in any deletions!'
+  comments.fields = '''This set of fields is significant, as some are used in filtering!
+                       Feel free to add others, but take care in any deletions!'''
   
 [paths]
-  comments.paths = 'Use direct path if all files together, or glob to match within all subdirs. Paths can be absolute or relative.'
+  comments.paths = '''Use direct path if all files together, or glob to match within all subdirs.
+                      Paths can be absolute or relative.'''
   working_dir = 'results'
   comments.working_dir = 'This is the place to work on files... (default "results")'
   cluster_ffn = "/projects/mbiomecore/data/HL44/prokka_asaf/by_clusters/*/prokka_out/"
   genome_bins = "/projects/mbiomecore/data/targeted/design/HLB_design/genome_bins/"
+
+[suffixes] #TODO: specify file suffixes ???
+  gbin_suffix = 'fasta'
+  ffn_suffix = 'ffn'
 
 [blastn]
   evalue = 0.001
@@ -24,17 +33,26 @@
   probe_length = 40
   probe_stride = 20
 
-[gc]
-  min_percent = 45
-  max_percent = 65
-
 [regexes]
-  musicc_regex = "" #TODO: retrieve from Jacqui's file
-  trna_regex = "" #TODO: retrieve from Jacqui's file
+	musicc_regex = [
+	    '_asd', '_metK', '_pgk', '_adk', '_eno', '_tpiA', '_tyrS', '_trpS',
+	    '_thrS', '_leuS', '_ileS', '_alaS', '_valS', '_metG', '_serS',
+	    '_aspS', '_proS', '_cysS', '_argS', '_pheS', '_pheT', '_hisS',
+	    '_pyrG', '_tsf', '_infB', '_ksgA', '_nusA', '_nusG', '_prfA',
+	    '_frr', '_rpoA', '_secY', '_ffh', '_ftsY', '_mraW', '_rnhB',
+	    '_smpB', '_grpE', '_uvrB', '_ychF', '_pyrH', '_nth', '_rsmH',
+	    'tRNA_ligase'
+	],
+	trna_regex = [
+	    '50S', '5S', '16S', '30S', '23S', 'repeat', 'tRNA-Ala', 'tRNA-Arg',
+	    'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln',
+	    'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys',
+	    'tRNA-Met', 'tRNA-Phe', 'tRNA-Pro', 'tRNA-Ser', 'tRNA-Thr',
+	    'tRNA-Trp', 'tRNA-Tyr', 'tRNA-val', 'hypothetical'
+	],
 
 [APPS]
-  catch = './catch/bin/design.py'
-  usearch = 'usearch'
+  catch = 'catch_design.py'
   blastdb = 'makeblastdb'
   blastn = 'blastn'
   comments = '''Use only the main executable name if they are in your $PATH !

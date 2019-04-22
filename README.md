@@ -12,8 +12,6 @@ Prior to running this pipeline, analyses will need to create:
 ### Application requirements:
 * catch/design.py - "A package for designing compact and comprehensive capture probe sets."
   * https://github.com/broadinstitute/catch/
-* usearch (used v8.0.1517_i86linux64)
-  * http://drive5.com/usearch/
 * ncbi-blast+ for makeblastdb, blastn (used 2.8.1+)
   * ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
 
