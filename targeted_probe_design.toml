@@ -34,22 +34,22 @@
   probe_stride = 20
 
 [regexes]
-	musicc_regex = [
-	    '_asd', '_metK', '_pgk', '_adk', '_eno', '_tpiA', '_tyrS', '_trpS',
-	    '_thrS', '_leuS', '_ileS', '_alaS', '_valS', '_metG', '_serS',
-	    '_aspS', '_proS', '_cysS', '_argS', '_pheS', '_pheT', '_hisS',
-	    '_pyrG', '_tsf', '_infB', '_ksgA', '_nusA', '_nusG', '_prfA',
-	    '_frr', '_rpoA', '_secY', '_ffh', '_ftsY', '_mraW', '_rnhB',
-	    '_smpB', '_grpE', '_uvrB', '_ychF', '_pyrH', '_nth', '_rsmH',
-	    'tRNA_ligase'
-	],
-	trna_regex = [
-	    '50S', '5S', '16S', '30S', '23S', 'repeat', 'tRNA-Ala', 'tRNA-Arg',
-	    'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln',
-	    'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys',
-	    'tRNA-Met', 'tRNA-Phe', 'tRNA-Pro', 'tRNA-Ser', 'tRNA-Thr',
-	    'tRNA-Trp', 'tRNA-Tyr', 'tRNA-val', 'hypothetical'
-	],
+  musicc_regex = [
+    '_asd', '_metK', '_pgk', '_adk', '_eno', '_tpiA', '_tyrS', '_trpS',
+    '_thrS', '_leuS', '_ileS', '_alaS', '_valS', '_metG', '_serS',
+    '_aspS', '_proS', '_cysS', '_argS', '_pheS', '_pheT', '_hisS',
+    '_pyrG', '_tsf', '_infB', '_ksgA', '_nusA', '_nusG', '_prfA',
+    '_frr', '_rpoA', '_secY', '_ffh', '_ftsY', '_mraW', '_rnhB',
+    '_smpB', '_grpE', '_uvrB', '_ychF', '_pyrH', '_nth', '_rsmH',
+    'tRNA_ligase'
+  ],
+  trna_regex = [
+    '50S', '5S', '16S', '30S', '23S', 'repeat', 'tRNA-Ala', 'tRNA-Arg',
+    'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln',
+    'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys',
+    'tRNA-Met', 'tRNA-Phe', 'tRNA-Pro', 'tRNA-Ser', 'tRNA-Thr',
+    'tRNA-Trp', 'tRNA-Tyr', 'tRNA-val', 'hypothetical'
+  ],
 
 [APPS]
   catch = 'catch_design.py'
