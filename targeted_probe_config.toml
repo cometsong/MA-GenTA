@@ -3,16 +3,16 @@
 #==============================================================================#
 
 [general]
-  final_probe_amount = 10
+  final_probe_amount = 20
   [gc]
     min_percent = 45
     max_percent = 65
 
-  fields = 'qsseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore'
-  comments.fields = '''This set of fields is significant, as some are used in filtering!
-                       Feel free to add others, but take care in any deletions!'''
-  
-[paths]
+[catch]
+  probe_length = 40
+  probe_stride = 20
+
+[paths] #TODO: specify file name lists instead of directories??
   comments.paths = '''Use direct path if all files together, or glob to match within all subdirs.
                       Paths can be absolute or relative.'''
   working_dir = 'results'
@@ -26,12 +26,13 @@
 
 [blastn]
   evalue = 0.001
-  num_alignments = 5
+  dust = 'no'
+  num_alignments = 250
   comments_num_alignments = 'Integer >1 to check probes match multi contigs after MUSiCC sequence split.'
 
-[catch]
-  probe_length = 40
-  probe_stride = 20
+  fields = 'qsseqid sseqid pident length qseq' # plus others, e.g.: 'mismatch gapopen qstart qend sstart send evalue bitscore'
+  comments.fields = '''The first 5 fields are significant, as some are used in later filtering and evaluating!
+                       Feel free to add others, but take care in any deletions!'''
 
 [regexes]
   musicc_regex = [
