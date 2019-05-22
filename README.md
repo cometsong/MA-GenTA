@@ -14,6 +14,9 @@ Prior to running this pipeline, analyses will need to create:
   * https://github.com/broadinstitute/catch/
 * ncbi-blast+ for makeblastdb, blastn (used 2.8.1+)
   * ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/
+* `clize` required only if pipeline option modification is needed in a separate file.
+  * to install it using pip:  `pip3 install clize`
+
 
 ### Python3:
 * [Python](https://www.python.org) &gt;= 3.6

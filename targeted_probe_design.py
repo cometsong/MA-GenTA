@@ -16,12 +16,13 @@ import random
 
 # Config options:
 from collections import OrderedDict as Ord
-import toml
+import tomlkit
 
 # pipeline-app modules
 from tprobe import (
     log,
-    CONFIG,
+    CONFIG, DB_CFG,
+    read_config_file,
     SqliteIO as Sdb,
     AbsPath as APath,
 )
@@ -35,6 +36,13 @@ from tprobe.utils import (
     write_out_csv,
     write_out_file,
 )
+
+try:
+    """parse all incoming command line args"""
+    from clize import run
+except ImportError:
+    log.notice('Using default configuration. (Module "clize" not installed to read command line.)')
+    run = lambda *args: main_pipe()
 
 __author__ = 'Benjamin Leopold <bleopold@jax.org>'
 
@@ -192,8 +200,8 @@ def catch_design_probes(gbin, dest_dir=None):
         probe_out = dest_dir / '.'.join([gbin.stem, 'probes', gbin.suffix[1:]])
         catch_tsv = dest_dir / '{}.probe_coverage_analysis.tsv'.format(gbin.stem)
 
-        opt_probe_length = CONFIG.get('catch').get('probe_length')
-        opt_probe_stride = CONFIG.get('catch').get('probe_stride')
+        opt_probe_length = str(CONFIG.get('catch').get('probe_length'))
+        opt_probe_stride = str(CONFIG.get('catch').get('probe_stride'))
         cmd = [catch_app,
                '--write-analysis-to-tsv', catch_tsv.abspath,
                '--probe-length', opt_probe_length,
@@ -226,7 +234,10 @@ def blast_clust_probes_on_genome(probe_file, blastdb):
         numaln = CONFIG.get('blastn').get('num_alignments', '250')
         numcpu = CONFIG.get('blastn').get('num_threads', '1')
         outfmt = CONFIG.get('blastn').get('outfmt', '10')
-        fields = CONFIG.get('blastn').get('fields')
+
+        fields = DB_CFG.get('blastn').get('fields').copy()
+        extras = CONFIG.get('blastn').get('fields')
+        fields += [f for f in extras if f not in fields]
         field_fmt = ' '.join(fields)
 
         if not probe_file.is_file():
@@ -265,11 +276,10 @@ def import_blasts_to_db(blast_hit_list, db_name=None, table_name=None):
     """Import blast results to database."""
 
     """check args or use config options"""
-    db_opts = CONFIG.get('database')
-    db = db_name or db_opts.get('name')
-    table_name = table_name or db_opts.get('probes_table')
-    table_cols = db_opts.get('probes_table_cols')
-    musicc_col = db_opts.get('musicc_boolean')
+    db = db_name or DB_CFG.get('clusterdb').get('name')
+    table_name = table_name or DB_CFG.get('probes_table').get('name')
+    table_cols = DB_CFG.get('probes_table').get('cols')
+    musicc_col = DB_CFG.get('musicc_boolean')
     table_cols[musicc_col] = 'BOOLEAN'
     index_cols = ', '.join(table_cols.keys()) # index only the default columns
 
@@ -309,13 +319,12 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
     try:
         log.info('Filtering headers in db view for {}'.format(dbname))
 
-        db_opts = CONFIG.get('database')
-        db = dbname or db_opts.get('name')
-        table_name = table_name or db_opts.get('probes_table')
-        filter_view = db_opts.get('probes_view')
+        db = dbname or DB_CFG.get('name')
+        table_name = table_name or DB_CFG.get('probes_table').get('name')
+        filter_view = DB_CFG.get('probes_view').get('name')
 
-        field_list = db_opts.get('probes_view_cols').copy()
-        musicc_col = db_opts.get('musicc_boolean')
+        field_list = DB_CFG.get('probes_view').get('cols').copy()
+        musicc_col = DB_CFG.get('musicc_boolean')
         field_list.append(musicc_col)
         field_sql = ', '.join(field_list)
 
@@ -372,12 +381,11 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
     final_amount = int(final_probe_amount) or int(CONFIG.get('general').get('final_probe_amount'))
     random_picks = randomly or CONFIG.get('general').get('final_probe_random')
-    db_opts = CONFIG.get('database')
-    musicc_col = db_opts.get('musicc_boolean')
-    filter_view = db_opts.get('probes_view')
+    musicc_col = DB_CFG.get('musicc_boolean')
+    filter_view = DB_CFG.get('probes_view').get('name')
 
     """final_fields taken from config/database/probes_view_cols last words (post-space)"""
-    final_fields = [col.split(' ')[-1] for col in CONFIG.get('database').get('probes_view_cols').copy()]
+    final_fields = [col.split(' ')[-1] for col in DB_CFG.get('probes_view').get('cols').copy()]
 
     for which, where in (('normal','0'), ('musicc','1')):
         export_bits = cluster_id + '_' + 'final_' + which + '_probes.fasta'
@@ -416,8 +424,7 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
     log.notice('Generating targeted probes for genome bin: {}'.format(gbin.name))
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
-    db_opts = CONFIG.get('database')
-    musicc_col = db_opts.get('musicc_boolean')
+    musicc_col = DB_CFG.get('musicc_boolean')
     blast_header = CONFIG.get('blastn').get('fields').copy()
     blast_header.extend([ 'gc_pct', musicc_col ])
     # log.debug('blast_header fields: {}'.format(blast_header))
@@ -488,76 +495,67 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
         log.notice('Number of fieldnames({}) not equal to' \
                    'number of values({})!'.format(len(probe_fields), len(probe_blasts[0])))
 
-def main_pipe():
-    """Execute the steps of the targeted probe design pipeline"""
-    log.name = 'Targeted Pipeline'
-    log.info('Beginning execution of the targeted design probe pipeline.')
 
-    log.name = 'Targeted:Check Config Options'
-    check_options()
+def main_pipe(*, config_file:'c'=None, debug=False):
+    """Execute the steps of the targeted probe design pipeline
+    
+    :param config_file: non-default TOML configuration file to set modified options.
+    :param debug: show internal debugging messages and configuration.
+    """
+    try:
+        log.name = 'Targeted_Pipeline'
+        log.info('Beginning execution of the targeted design probe pipeline.')
 
-    working_dir = APath(CONFIG.get('paths').get('working_dir'))
-    prokka_dir = APath(CONFIG.get('paths').get('prokka_dir'))
-    gbin_path = APath(CONFIG.get('paths').get('genome_bins'))
-    gbin_suff = CONFIG.get('general').get('genome_bins_suffix', '.fasta') #FIXME: not reading from config ??
-    # gbin_suff = CONFIG.get('general').get('genome_bins_suffix')
-    # log.notice('gbin_suff {}'.format(gbin_suff))
-    # sys.exit()
-    db_opts = CONFIG.get('database')
+        if config_file:
+            log.name = 'Targeted:Read Config Options'
+            CONFIG.update(read_config_file(config_file))
 
-    """Copy cluster prediction files and make blast dbs for each"""
-    log.name = 'Targeted:GetMwgsProkka'
-    prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir)
+        log.name = 'Targeted:Check Config Options'
+        check_options()
 
-    """prepend file name (from .stem) into prokka fasta headers:"""
-    log.name = 'Targeted:prepend cluster id'
-    for pf in prokka_files:
-        pfp = APath(pf)
-        sed_inplace(pfp.abspath, r'^>', '>{}_'.format(pfp.stem))
+        working_dir = APath(CONFIG.get('paths').get('working_dir'))
 
-    """concat all clusters' prokka_files into one for blasting"""
-    log.name = 'Targeted:Concat all prokka files'
-    blastdb_base = db_opts.get('blastdb_basename')
-    blastdb_suff = db_opts.get('blastdb_suffix')
-    blastdb_name = '.'.join([blastdb_base, blastdb_suff])
-    blastdb_path = working_dir / blastdb_name
-    prokka_all_clusters = concatenate_files(
-        working_dir.abspath,
-        blastdb_path.abspath,
-        suffix='.ffn',
-        clobber=True
-    )
+        prokka_dir = APath(CONFIG.get('paths').get('prokka_dir'))
+        prokka_suff = CONFIG.get('general').get('prokka_prediction_suffix')
 
-    """Make blast dbs for all ffn"""
-    log.name = 'Targeted:blastdb'
-    makeblastdb(prokka_all_clusters)
+        gbin_dir = APath(CONFIG.get('paths').get('genome_bins'))
+        gbin_suff = CONFIG.get('general').get('genome_bins_suffix')
 
-    """Design probes for genome bin fastas"""
-    log.name = 'Targeted Pipeline'
-    #TODO: run in parallel, use multiprocessing.Pool ??
-    for gbin in gbin_path.glob('*'+gbin_suff):
-        targeted_genome_bin_probes(gbin, blastdb=prokka_all_clusters)
+        blastdb_name = DB_CFG.get('blastdb').get('name')
+        blastdb_path = working_dir / blastdb_name
 
-    #TODO: only display the modifiable CONFIG options!!
-    toml_config = toml.dumps({k:v for k,v in CONFIG.items() if 'database' not in k})
-    toml_config = '    '+toml_config.replace(os.linesep, f'{os.linesep}    ')
-    log.notice(f'Completed generating targeted probes, using config options:\n{toml_config}')
+        """Copy cluster prediction files and make blast dbs for each"""
+        log.name = 'Targeted:GetMwgsProkka'
+        prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir, suffix=prokka_suff)
+
+        # """concat all clusters' prokka_files into one for blasting"""
+        log.name = 'Targeted:Concat all prokka files'
+        prokka_all_clusters = concatenate_files(
+            working_dir.abspath,
+            blastdb_path.abspath,
+            suffix='.ffn',
+            clobber=True
+        )
+
+        """Make blast dbs for all ffn"""
+        log.name = 'Targeted:blastdb'
+        makeblastdb(prokka_all_clusters)
+
+        """Design probes for genome bin fastas"""
+        log.name = 'Targeted Pipeline'
+        #TODO: run in parallel, use multiprocessing.Pool ??
+        for gbin in gbin_dir.glob('*'+gbin_suff):
+            targeted_genome_bin_probes(gbin, blastdb=prokka_all_clusters)
+    except Exception as e:
+        raise e
+
+    finally:
+        log.name = 'Targeted Pipeline'
+        log.notice(f'''Completed generating targeted probes!
+                   \nConfig options used: {tomlkit.dumps(CONFIG)}''')
+        if debug:
+            log.notice(f'''\nDatabase Config options used: {tomlkit.dumps(DB_CFG)}''')
 
 
 if __name__ == '__main__':
-    log.notice('TEST!  Starting TEST run.')
-    log.notice('TEST!  setting temp options')
-    CONFIG.update(Ord(
-        # general = Ord(),
-        paths = Ord(
-            # working_dir = 'results',
-            # prokka_dir  = "data_clusters_tests/prokka_annotations",
-            # genome_bins = "data_clusters_tests/genome_bins",
-            working_dir = '/usr/local/data/targeted_pipeline_data/results',
-            prokka_dir  = '/usr/local/data/targeted_pipeline_data/prokka_annotations',
-            genome_bins = '/usr/local/data/targeted_pipeline_data/genome_bins',
-        ),
-    ))
-    log.notice('opts.paths {}'.format(CONFIG.get('paths')))
-
-    sys.exit(main_pipe())
+    run(main_pipe)
