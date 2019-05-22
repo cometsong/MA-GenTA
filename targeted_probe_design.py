@@ -466,28 +466,27 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
             vals_dict = {f:v for (f,v) in zip(probe_fields, vals)}
             pseqs.append(vals_dict)
         log.debug('len pseqs: {}'.format(len(pseqs)))
+
+        """import blast file to cluster database"""
+        log.name = 'Probe:ImportBlast'
+        db_name or DB_CFG.get('clusterdb').get('name')
+        clust_db = working_dir / '_'.join([cluster_id, db_name])
+        log.info('Importing blast matches to db "{}"'.format(clust_db))
+        import_blasts_to_db(pseqs, db_name=clust_db.abspath)
+
+        """Filter resulting table to limits in CONFIG"""
+        log.name = 'Probe:FilterView'
+        filter_probe_seqs(clust_db.abspath, cluster_id)
+
+        """Create two views, one for SC, one inverse for MC"""
+        log.name = 'Probe:ExportFinals'
+        final_probe_amount = CONFIG.get('general').get('final_probe_amount')
+        log.debug(' ... final_probe_amount {}'.format(final_probe_amount))
+        export_final_sets(clust_db.abspath, cluster_id, final_probe_amount=final_probe_amount)
+        
     else:
         log.notice('Number of fieldnames({}) not equal to' \
                    'number of values({})!'.format(len(probe_fields), len(probe_blasts[0])))
-        continue
-
-    """import blast file to cluster database"""
-    log.name = 'Probe:ImportBlast'
-    db_name = db_opts.get('name')
-    clust_db = working_dir / '_'.join([cluster_id, db_name])
-    log.info('Importing blast matches to db "{}"'.format(clust_db))
-    import_blasts_to_db(pseqs, db_name=clust_db.abspath)
-
-    """Filter resulting table to limits in CONFIG"""
-    log.name = 'Probe:FilterView'
-    filter_probe_seqs(clust_db.abspath, cluster_id)
-
-    """Create two views, one for SC, one inverse for MC"""
-    log.name = 'Probe:ExportFinals'
-    final_probe_amount = CONFIG.get('general').get('final_probe_amount')
-    log.debug(' ... final_probe_amount {}'.format(final_probe_amount))
-    export_final_sets(clust_db.abspath, cluster_id, final_probe_amount=final_probe_amount)
-    
 
 def main_pipe():
     """Execute the steps of the targeted probe design pipeline"""
