@@ -424,18 +424,18 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
 
 def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
-    log.notice('Generating targeted probes for genome bin: {}'.format(gbin.name))
+    log.notice('Generating targeted probes for genome bin: {}'.format(genome_bin.name))
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
     musicc_col = DB_CFG.get('musicc_boolean')
     blast_header = CONFIG.get('blastn').get('fields').copy()
     blast_header.extend([ 'gc_pct', musicc_col ])
     # log.debug('blast_header fields: {}'.format(blast_header))
 
-    blastdb = blastdb or makeblastdb(gbin)
-    cluster_id = gbin.stem
+    blastdb = blastdb or makeblastdb(genome_bin)
+    cluster_id = genome_bin.stem
 
     log.name = 'Probe:CatchDesign'
-    probes_file = catch_design_probes(gbin)
+    probes_file = catch_design_probes(genome_bin)
 
     """probe_blasts is list of all blast matched records (as lists)"""
     log.name = 'Probes:Blast'
