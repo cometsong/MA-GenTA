@@ -35,7 +35,7 @@ def log_file_init(log_name=__name__, logfile=None):
     return logfile
 
 
-def log_init(name=__name__, level='WARNING',  format_string=FORMAT_STRING, logfile=None):
+def log_init(name=__name__, level='NOTICE',  format_string=FORMAT_STRING, logfile=None):
     """Initialize a new Logger to file and colorized stderr stream"""
     logfile = log_file_init(log_name=name, logfile=logfile)
 
