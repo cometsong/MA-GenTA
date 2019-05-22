@@ -107,11 +107,13 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
              'from {} into {}'.format(srce_dir, dest_dir))
     dest_files = []
     for ffn in srce_dir.glob('*'+suffix):
-        log.info('copying {}'.format(ffn.name))
+        log.info('Copying {}'.format(ffn.name))
         try:
             dst_fn = dest_dir / ffn.name
             dest_files.append(shutil.copyfile(ffn, dst_fn))
-            replace_spaces(dst_fn, '_') 
+            replace_spaces(dst_fn, '_')
+            log.info('Prepending "{}" into sequence headers'.format(ffn.stem))
+            sed_inplace(dst_fn, r'^>', '>{}_'.format(ffn.stem))
         except IOError as e:
             log.error('IOError, copying "{}" to "{}": {}'.format(
                           e.filename, e.filename2, e))
