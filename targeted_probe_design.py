@@ -50,38 +50,42 @@ __author__ = 'Benjamin Leopold <bleopold@jax.org>'
 
 def check_options():
     """check validity of CONFIG settings, try setup if needed"""
-    # Path exists or create it:
-    cwd = APath(CONFIG.get('paths').get('working_dir'))
-    gbp = APath(CONFIG.get('paths').get('genome_bins'))
-    ffn = APath(CONFIG.get('paths').get('prokka_dir'))
+    # Check [paths] options, either it exists or create it:
     try:
         log.info('Checking files and directories.')
-        dirs = [cwd, gbp, ffn]
-        for pdir in dirs:
+        path_opts = CONFIG.get('paths')
+        for opt, val in path_opts.items():
+            if not len(val):
+                log.notice('Path "{}" not set in config.'.format(opt))
+                continue
+            pdir = APath(val)
             if pdir.is_dir():
-                log.info('{} directory found.'.format(pdir.name))
+                log.info('Path: "{}" directory found.'.format(opt))
             else:
-                log.warning('{} is not a directory?!'.format(pdir.name))
+                log.warning('Path: "{}" is not a directory?!'.format(pdir.name))
                 try:
                     pdir.mkdir(parents=True, exist_ok=True)
-                    log.notice('{} directory created.'.format(pdir.name))
+                    log.notice('Path: "{}" directory created.'.format(pdir.abspath))
                 except FileExistsError as e:
                     log.error('File/dir exists.')
                     raise e
+            # set CONFIG to use abspath of pdir
+            path_opts[opt] = pdir.abspath
     except Exception as e:
         raise e
 
     # APP executable checks:
-    apps = {k:v for k,v in CONFIG.get('APPS').items()
-            if 'comments' not in k}
+    apps = CONFIG.get('APPS')
     cmd_exists = lambda x: shutil.which(x) is not None
     try:
         log.info('Checking applications usable.')
-        for app in apps:
+        log.debug('PATH="{}"'.format(os.environ.get("PATH")))
+        for opt, app in apps.items():
+            log.notice('App for: "{}"'.format(opt))
             if cmd_exists(app):
-                log.warning('{} is not an app?!'.format(app))
+                log.info('App: "{}" found.'.format(app))
             else:
-                log.info('Application "{}" found.'.format(app))
+                log.warning('App: "{}" is not found?!'.format(app))
     except Exception as e:
         raise e
 
@@ -507,8 +511,8 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         log.name = 'Targeted:Check Config Options'
         check_options()
 
+        log.name = 'Targeted_Pipeline'
         working_dir = APath(CONFIG.get('paths').get('working_dir'))
-
         prokka_dir = APath(CONFIG.get('paths').get('prokka_dir'))
         prokka_suff = CONFIG.get('general').get('prokka_prediction_suffix')
 
@@ -555,7 +559,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
             targeted_genome_bin_probes(gbin, blastdb=prokka_all_clusters)
     except Exception as e:
         log.error('Error. {}'.format(e.args))
-        # raise e
+        raise e
 
     finally:
         log.name = 'Targeted Pipeline'
