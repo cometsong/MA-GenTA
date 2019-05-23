@@ -80,8 +80,8 @@ def replace_spaces(filepath, replace='_'):
 
 
 def concatenate_files(filepath, destfile, suffix='', clobber=False):
-    """cat all files into single new destfile"""
-    log.info('in util function concatenate_files')
+    """cat all files into single new destfile, appending to it if not 'clobber'"""
+    log.info('in function concatenate_files')
     try:
         fpath = Path(filepath)
         dests = [f for f in fpath.glob('*'+suffix)
@@ -96,10 +96,11 @@ def concatenate_files(filepath, destfile, suffix='', clobber=False):
             for b in dests:
                 with open(b) as bff:
                     dest.write(bff.read())
-        return destfile
     except Exception as e:
         log.error('Error: {}'.format(e.args))
         raise e
+    else:
+        return destfile
 
 
 def run_cmd(cmd, only_stdout=False):
