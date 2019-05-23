@@ -119,9 +119,7 @@ def read_config_file(config_file=None):
         log.info('Reading config file: {}'.format(config_file))
         cfg_opts = {}
         if os.path.exists(config_file):
-            #TODO: read the actual config file!
-            cfg_file = TOMLFile(config_file)
-            cfg_opts = cfg_file.read()
+            cfg_opts = TOMLFile(config_file).read()
     except Exception as e:
         log.exception('Error: {}'.format(e))
         raise e
