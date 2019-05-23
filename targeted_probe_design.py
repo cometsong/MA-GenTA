@@ -46,15 +46,7 @@ except ImportError:
 
 __author__ = 'Benjamin Leopold <bleopold@jax.org>'
 
-#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~
-# log.info('Loading configuration from file.')
-# CONFIG_FILE="probe_design.config.toml" #TODO: allow custom CONFIG_FILE as ARG
-# log.info('Loading configuration changes from file ().'.format(CONFIG_FILE))
-# with open(CONFIG_FILE) as cfgfile:
-#     cfg_opts = toml.load(cfgfile, _dict=Ord)
-# CONFIG.update(cfg_opts)
-#TODO: option to write out new/modidied config file?
-
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pipeline Functions ~~~~~
 
 def check_options():
     """check validity of CONFIG settings, try setup if needed"""
@@ -523,25 +515,38 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         gbin_dir = APath(CONFIG.get('paths').get('genome_bins'))
         gbin_suff = CONFIG.get('general').get('genome_bins_suffix')
 
-        blastdb_name = DB_CFG.get('blastdb').get('name')
-        blastdb_path = working_dir / blastdb_name
-
         """Copy cluster prediction files and make blast dbs for each"""
         log.name = 'Targeted:GetMwgsProkka'
         prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir, suffix=prokka_suff)
 
-        # """concat all clusters' prokka_files into one for blasting"""
-        log.name = 'Targeted:Concat all prokka files'
-        prokka_all_clusters = concatenate_files(
-            working_dir.abspath,
-            blastdb_path.abspath,
-            suffix='.ffn',
-            clobber=True
-        )
-
-        """Make blast dbs for all ffn"""
+        """Make blast dbs for all ffn, if no preexisting designated use_blastdb"""
         log.name = 'Targeted:blastdb'
-        makeblastdb(prokka_all_clusters)
+        use_blastdb = CONFIG.get('paths').get('use_blastdb', None)
+
+        if use_blastdb:
+            try:
+                use_blastdb_path = APath(use_blastdb)
+                log.info('Using pre-existing blastdb: {}'.format(use_blastdb_path.abspath))
+                prokka_all_clusters = use_blastdb_path.abspath
+            except Exception as e:
+                log.error('Unable to use pre-existing blastdb: {}'.format(use_blastdb))
+                raise e
+        else:
+            blastdb_name = DB_CFG.get('blastdb').get('name')
+            blastdb_path = working_dir / blastdb_name
+            try:
+                log.info('Creating blastdb: {}'.format(blastdb_path.abspath))
+                """concat all clusters' prokka_files into one for blasting"""
+                prokka_all_clusters = concatenate_files(
+                    working_dir.abspath,
+                    blastdb_path.abspath,
+                    suffix=prokka_suff,
+                    clobber=True
+                )
+                makeblastdb(prokka_all_clusters)
+            except Exception as e:
+                log.error('Unable to create blastdb: {}'.format(blastdb_name))
+                raise e
 
         """Design probes for genome bin fastas"""
         log.name = 'Targeted Pipeline'
@@ -549,7 +554,8 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         for gbin in gbin_dir.glob('*'+gbin_suff):
             targeted_genome_bin_probes(gbin, blastdb=prokka_all_clusters)
     except Exception as e:
-        raise e
+        log.error('Error. {}'.format(e.args))
+        # raise e
 
     finally:
         log.name = 'Targeted Pipeline'

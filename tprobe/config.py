@@ -39,17 +39,18 @@ _DEFAULT_CONFIG_TOML = """
 
 [paths]
     # Where are your source data files? Where do you want the resulting files located?
-    working_dir = "/usr/local/data/targeted_pipeline_data/results"
-    prokka_dir  = "/usr/local/data/targeted_pipeline_data/prokka_annotations"
-    genome_bins = "/usr/local/data/targeted_pipeline_data/genome_bins"
+    working_dir = 'pipeline_results' # working_dir: 'This is the place to work on files... (default "pipeline_results")'
+    cluster_ffn = 'cluster_prokka_annotations'
+    genome_bins = 'cluster_genome_bins'
+    use_blastdb = '' # can be any "preexisting_db_path" or empty if new blastdbs to be created.
 
 [blastn]
     evalue         = 0.001
     dust           = "no"
-    num_alignments = 250
-    # num_alignments: Integer >1 to check probes match multi contigs after MUSiCC sequence split. (blastn default: 250)
-    outfmt         = 10 # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
-    num_threads    = 2  # how many cpus?
+    num_alignments = 250 # Integer >1. (blastn default: 250)
+    num_threads    = 2   # how many cpus?
+
+    outfmt         = 10  # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
     fields = [ "qseqid", "sseqid", "pident", "length", "qseq" ]
     # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
 
