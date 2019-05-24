@@ -40,8 +40,8 @@ _DEFAULT_CONFIG_TOML = """
 [paths]
     # Where are your source data files? Where do you want the resulting files located?
     working_dir = 'pipeline_results' # This is the place to work on files... (default "pipeline_results")
-    prokka_dir  = 'cluster_prokka_annotations'
     genome_bins = 'cluster_genome_bins'
+    prokka_dir  = 'cluster_prokka_annotations' # files in this dir used for creating new blastdbs
     use_blastdb = '' # can be any "preexisting_db_path" or empty if new blastdbs to be created.
 
 [blastn]
