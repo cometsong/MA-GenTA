@@ -53,25 +53,54 @@ def check_options():
     # Check [paths] options, either it exists or create it:
     try:
         log.info('Checking files and directories.')
+        paths = [ 'working_dir', 'genome_bins', 'use_blastdb', 'prokka_dir' ]
         path_opts = CONFIG.get('paths')
-        for opt, val in path_opts.items():
-            if not len(val):
-                log.notice('Path "{}" not set in config.'.format(opt))
-                continue
-            pdir = APath(val)
-            if pdir.is_dir():
-                log.info('Path: "{}" directory found.'.format(opt))
-            else:
-                log.warning('Path: "{}" is not a directory?!'.format(pdir.name))
-                try:
-                    pdir.mkdir(parents=True, exist_ok=True)
-                    log.notice('Path: "{}" directory created.'.format(pdir.abspath))
-                except FileExistsError as e:
-                    log.error('File/dir exists.')
-                    raise e
-            # set CONFIG to use abspath of pdir
-            path_opts[opt] = pdir.abspath
+
+        path = 'working_dir'
+        log.info('Checking "{}"'.format(path))
+        ppath = APath(path_opts.get(path))
+        if ppath.is_dir():
+            log.info('Path: "{}" directory found.'.format(ppath.name))
+        else:
+            log.warning('Path for "{}" directory not found!'.format(ppath.name))
+            try:
+                ppath.mkdir(parents=True, exist_ok=True)
+                log.notice('Path: "{}" directory created.'.format(ppath.abspath))
+            except FileExistsError as e:
+                log.error('File/dir exists.')
+                raise e
+        path_opts[path] = ppath.abspath
+
+        path = 'genome_bins'
+        log.info('Checking "{}"'.format(path))
+        ppath = APath(path_opts.get(path), '')
+        assert ppath.is_dir(), 'Path "{}" is not found!'.format(ppath)
+        log.info('Path: "{}" file found.'.format(ppath.abspath))
+        path_opts[path] = ppath.abspath
+
+        path = 'use_blastdb'
+        ppath = path_opts.get(path)
+        if ppath:
+            log.info('Checking "{}"'.format(path))
+            ppath = APath(path_opts.get(path), '')
+            assert ppath.is_file(), 'Path "{}" is not a file!'.format(ppath)
+            log.info('Path: "{}" file found.'.format(ppath.abspath))
+            path_opts[path] = ppath.abspath
+        else:
+            path = 'prokka_dir'
+            log.info('Checking "{}"'.format(path))
+            ppath = APath(path_opts.get(path), '')
+            assert ppath.is_dir(), 'Path "{}" is not found!'.format(ppath)
+            log.info('Path: "{}" file found.'.format(ppath.abspath))
+            path_opts[path] = ppath.abspath
+
+    except AssertionError as e:
+        log.error(e)
+        sys.exit(1)
+        raise e
     except Exception as e:
+        log.error(e)
+        sys.exit(1)
         raise e
 
     # APP executable checks:
@@ -102,6 +131,7 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
     log.info('Copying and processing Prokka ffn files '
              'from {} into {}'.format(srce_dir, dest_dir))
     dest_files = []
+    assert next(srce_dir.glob('*'+suffix)),     'No matching files in the dir "{}"'.format(srce_dir.abspath)
     for ffn in srce_dir.glob('*'+suffix):
         log.info('Copying {}'.format(ffn.name))
         try:
@@ -506,7 +536,11 @@ def main_pipe(*, config_file:'c'=None, debug=False):
 
         if config_file:
             log.name = 'Targeted:Read Config Options'
-            CONFIG.update(read_config_file(config_file))
+            # CONFIG.update(read_config_file(config_file))
+            user_cfg = read_config_file(config_file)
+            for k in CONFIG:
+                if k in user_cfg:
+                    CONFIG[k].update(user_cfg[k])
 
         log.name = 'Targeted:Check Config Options'
         check_options()
