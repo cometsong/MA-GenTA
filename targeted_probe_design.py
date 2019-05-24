@@ -547,15 +547,8 @@ def main_pipe(*, config_file:'c'=None, debug=False):
 
         log.name = 'Targeted_Pipeline'
         working_dir = APath(CONFIG.get('paths').get('working_dir'))
-        prokka_dir = APath(CONFIG.get('paths').get('prokka_dir'))
-        prokka_suff = CONFIG.get('general').get('prokka_prediction_suffix')
-
         gbin_dir = APath(CONFIG.get('paths').get('genome_bins'))
         gbin_suff = CONFIG.get('general').get('genome_bins_suffix')
-
-        """Copy cluster prediction files and make blast dbs for each"""
-        log.name = 'Targeted:GetMwgsProkka'
-        prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir, suffix=prokka_suff)
 
         """Make blast dbs for all ffn, if no preexisting designated use_blastdb"""
         log.name = 'Targeted:blastdb'
@@ -564,8 +557,10 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         if use_blastdb:
             try:
                 use_blastdb_path = APath(use_blastdb)
-                log.info('Using pre-existing blastdb: {}'.format(use_blastdb_path.abspath))
-                prokka_all_clusters = use_blastdb_path.abspath
+                blastdb_name = use_blastdb_path.name
+                with use_blastdb_path.resolve(strict=True):
+                    log.info('Using pre-existing blastdb: {}'.format(use_blastdb_path.abspath))
+                    blast_all_clusters = use_blastdb_path.abspath
             except Exception as e:
                 log.error('Unable to use pre-existing blastdb: {}'.format(use_blastdb))
                 raise e
@@ -573,15 +568,21 @@ def main_pipe(*, config_file:'c'=None, debug=False):
             blastdb_name = DB_CFG.get('blastdb').get('name')
             blastdb_path = working_dir / blastdb_name
             try:
+                """Copy cluster prediction files and make blast dbs for each"""
+                # log.name = 'Targeted:GetMwgsProkka'
+                prokka_dir = APath(CONFIG.get('paths').get('prokka_dir'))
+                prokka_suff = CONFIG.get('general').get('prokka_prediction_suffix')
+                prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir, suffix=prokka_suff)
+
                 log.info('Creating blastdb: {}'.format(blastdb_path.abspath))
                 """concat all clusters' prokka_files into one for blasting"""
-                prokka_all_clusters = concatenate_files(
+                blast_all_clusters = concatenate_files(
                     working_dir.abspath,
                     blastdb_path.abspath,
                     suffix=prokka_suff,
                     clobber=True
                 )
-                makeblastdb(prokka_all_clusters)
+                makeblastdb(blast_all_clusters)
             except Exception as e:
                 log.error('Unable to create blastdb: {}'.format(blastdb_name))
                 raise e
@@ -590,7 +591,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         log.name = 'Targeted Pipeline'
         #TODO: run in parallel, use multiprocessing.Pool ??
         for gbin in gbin_dir.glob('*'+gbin_suff):
-            targeted_genome_bin_probes(gbin, blastdb=prokka_all_clusters)
+            targeted_genome_bin_probes(gbin, blastdb=blast_all_clusters)
     except Exception as e:
         log.error('Error. {}'.format(e.args))
         raise e
