@@ -453,16 +453,14 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
     log.notice('Generating targeted probes for genome bin: {}'.format(genome_bin.name))
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
-    blast_header = list(DB_CFG.get('probes_table').get('cols').keys())
-    # blast_header.extend([ 'gc_pct', 'is_musicc' ])
+    blast_header = DB_CFG.get('blastn').get('fields').copy()
     blast_extras = CONFIG.get('blastn').get('fields').copy()
 
-    """add in extra non-default blastn fields to the column list without datatype"""
-    blastn_fields = CONFIG.get('blastn').get('fields').copy()
+    """add in extra non-default blastn fields to the header"""
     for fld in blast_extras:
         if fld not in blast_header:
             blast_header.append(fld)
-    log.debug('blast_header fields: {}'.format(blast_header))
+    blast_header.extend([ 'gc_pct', 'is_musicc' ])
 
     blastdb = blastdb or makeblastdb(genome_bin)
     cluster_id = genome_bin.stem
