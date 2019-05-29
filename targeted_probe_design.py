@@ -150,18 +150,19 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
     return dest_files
 
 
-def makeblastdb(fastaname, blasst_db=None):
+def makeblastdb(fastaname, blast_db=None):
     """make blast db from fasta file
     Requires: [makeblastdb]
     """
     log.info('Making blastdb for {}'.format(fastaname))
     try:
-        dest_db = blasst_db or fastaname
+        dest_db = blast_db or fastaname
         mkblastdb = CONFIG.get('APPS').get('blastdb')
         cmd = [mkblastdb,
                '-dbtype', 'nucl',
                '-in', fastaname,
-               '-out', dest_db
+               '-out', dest_db,
+               '-logfile', fastaname+'.makeblastdb.log'
                ]
         output = run_cmd(cmd)
     except Exception as e:
