@@ -74,7 +74,6 @@ _DATABASE_CONFIG_TOML = """
 
 clusterdb.name = 'targeted_probe_cluster.db'
 blastdb.name   = 'all_clusters_prokka.fasta'
-musicc_boolean = 'is_musicc'
 
 blastn.fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
 
@@ -87,7 +86,7 @@ blastn.fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
     length = 'INTEGER'
     qseq   = 'TEXT'
     gc_pct = 'REAL'
-    # + musicc_boolean = BOOLEAN
+    is_musicc = 'BOOLEAN'
     # + plus "extra" config'd blast fields when db table created
 
 [probes_view]
@@ -99,7 +98,7 @@ blastn.fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
         'length',
         'gc_pct',
         'qseq as probe_seq',
-        # + musicc_boolean
+        'is_musicc',
     ]
 """
 DATABASE_CONFIG = tomlkit.parse(_DATABASE_CONFIG_TOML)

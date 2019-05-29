@@ -313,8 +313,6 @@ def import_blasts_to_db(blast_hit_list, db_name=None, table_name=None):
     db = db_name or DB_CFG.get('clusterdb').get('name')
     table_name = table_name or DB_CFG.get('probes_table').get('name')
     table_cols = DB_CFG.get('probes_table').get('cols')
-    musicc_col = DB_CFG.get('musicc_boolean')
-    table_cols[musicc_col] = 'BOOLEAN'
     index_cols = ', '.join(table_cols.keys()) # index only the default columns
 
     """add in extra non-default blastn fields to the column list without datatype"""
@@ -415,7 +413,6 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
     final_amount = int(final_probe_amount) or int(CONFIG.get('general').get('final_probe_amount'))
     random_picks = randomly or CONFIG.get('general').get('final_probe_random')
-    musicc_col = DB_CFG.get('musicc_boolean')
     filter_view = DB_CFG.get('probes_view').get('name')
 
     """final_fields taken from config/database/probes_view_cols last words (post-space)"""
@@ -424,7 +421,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
     for which, where in (('normal','0'), ('musicc','1')):
         export_bits = cluster_id + '_' + 'final_' + which + '_probes.fasta'
         export_file = working_dir / export_bits
-        whim = musicc_col+'='+where
+        whim = 'is_musicc='+where
 
         record_count = Sdb.iter_select(dbname, filter_view, where=whim, fields='count(*) as recs')
         record_count = next(record_count).pop('recs')
