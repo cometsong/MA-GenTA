@@ -477,6 +477,7 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
 
     """Calculate GC% for each seq in probes. Append that and seq onto probe_blasts"""
     probe_ids = set( [pb[0] for pb in probe_blasts] )
+    probes_gc = {}
 
     log.name = ('Probe:GC,MUSiCC')
     log.info('Processing blast match sequences for GC%, and the seq hits for MUSiCC')
@@ -487,8 +488,10 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
             log.info('Processing probe seq id: "{}"'.format(qid))
             for pb in probe_blasts:
                 if pb[0] == qid:
-                    log.debug(' ... Calc GC% on "{}"'.format(qid))
-                    pb.append( pct_gc(seq) )
+                    if pb[0] not in probes_gc:
+                        log.debug(' ... Calc GC% on "{}"'.format(qid))
+                        probes_gc[pb[0]] = pct_gc(seq)
+                    pb.append( probes_gc[pb[0]] )
                     log.debug(' ... Check MUSiCC on "{}"'.format(pb[1]))
                     is_musicc = 1 if musicc_re.search(pb[1]) else 0
                     pb.append( is_musicc )
