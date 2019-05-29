@@ -23,19 +23,19 @@ _DEFAULT_CONFIG_TOML = """
 #==============================================================================#
 
 [general]
-    final_probe_amount = 20
+    final_probe_amount = '20'
     final_probe_random = true
-    probe_length = 40
+    probe_length = '40'
     prokka_prediction_suffix = '.ffn'
     genome_bins_suffix = '.fasta'
 
 [gc_percent]
-    min_percent = 45
-    max_percent = 65
+    min_percent = '45'
+    max_percent = '65'
 
 [catch]
-    probe_length = 40
-    probe_stride = 20
+    probe_length = '40'
+    probe_stride = '20'
     reuse_existing_probe_files = false
 
 [paths]
@@ -46,12 +46,12 @@ _DEFAULT_CONFIG_TOML = """
     use_blastdb = '' # can be any "preexisting_db_path" or empty if new blastdbs to be created.
 
 [blastn]
-    evalue         = 0.001
+    evalue         = '0.001'
     dust           = 'no'
-    num_alignments = 250 # Integer >1. (blastn default: 250)
-    num_threads    = 2   # how many cpus?
+    num_alignments = '250' # Integer >1. (blastn default: 250)
+    num_threads    = '2'   # how many cpus?
 
-    outfmt         = 10  # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
+    outfmt         = '10'  # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
     fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
     # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
 
