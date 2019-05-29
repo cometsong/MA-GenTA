@@ -417,7 +417,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
     final_fields = [col.split(' ')[-1] for col in DB_CFG.get('probes_view').get('cols').copy()]
 
     for which, where in (('normal','0'), ('musicc','1')):
-        export_bits = cluster_id + '_' + 'final_' + which + '_probes.fasta'
+        export_bits = '.'.join([cluster_id, 'probes', 'final', which, 'fasta'])
         export_file = working_dir / export_bits
         whim = 'is_musicc='+where
 
@@ -473,8 +473,6 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
 
     """probe_blasts is list of all blast matched records (as lists)"""
     log.name = 'Probes:Blast'
-    blast_probe_path = working_dir / '{}_blast_probes.csv'.format(cluster_id)
-    blast_probe_file = blast_probe_path.abspath
     probe_blasts = blast_clust_probes_on_genome(probes_file, blastdb)
 
     """Calculate GC% for each seq in probes. Append that and seq onto probe_blasts"""
@@ -497,7 +495,8 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
 
     """Get list of fields; write to csv file as header"""
     probe_blasts.insert(0, blast_header)
-    write_out_csv(blast_probe_file, probe_blasts, append=False)
+    blast_probe_file = probes_file.with_suffix('.blasts.csv')
+    write_out_csv(blast_probe_file.abspath, probe_blasts, append=False)
 
     """Convert Blast list into field:val dict for db import"""
     log.name = ('Probe:BlastListtPrepImport')
