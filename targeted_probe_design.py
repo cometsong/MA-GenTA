@@ -358,8 +358,8 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         field_list = DB_CFG.get('probes_view').get('cols').copy()
         field_sql = ', '.join(field_list)
 
-        gc_min = CONFIG.get('general').get('gc').get('min_percent')
-        gc_max = CONFIG.get('general').get('gc').get('max_percent')
+        gc_min = CONFIG.get('gc_percent').get('min_percent')
+        gc_max = CONFIG.get('gc_percent').get('max_percent')
         probe_length = CONFIG.get('general').get('probe_length')
 
         trna_list = CONFIG.get('filters').get('trna_list')
