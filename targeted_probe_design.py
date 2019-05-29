@@ -212,7 +212,7 @@ def make_blacklists(filepath, suffix='fasta'):
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Exec 'CATCH' Probe design ~~~~~
-def catch_design_probes(gbin, dest_dir=None):
+def catch_design_probes(gbin, dest_dir=None, reuse_existing=False):
     """Design cluster probes using catch app.
     Prepend cluster gbin name into header in resulting sequence files.
     Requires: [catch]
@@ -221,12 +221,18 @@ def catch_design_probes(gbin, dest_dir=None):
     log.info('Designing probes for {}'.format(gbin.name))
      
     dest_dir = dest_dir or APath(CONFIG.get('paths').get('working_dir'))
+    # log.notice('reuse_existing: {}'.format(reuse_existing))
     try:
         catch_app = CONFIG.get('APPS').get('catch')
 
         # insert '.probes' into outfile and log names
+        # probe_out = dest_dir / '{}.{}{}'.format(gbin.stem, 'probes', gbin.suffix) #TODO: check for '.' begin suffix
         probe_out = dest_dir / '.'.join([gbin.stem, 'probes', gbin.suffix[1:]])
         catch_tsv = dest_dir / '{}.probe_coverage_analysis.tsv'.format(gbin.stem)
+
+        if reuse_existing and probe_out.exists():
+            log.info('Using pre-existing cluster probes file "{}"'.format(probe_out))
+            return probe_out
 
         opt_probe_length = str(CONFIG.get('catch').get('probe_length'))
         opt_probe_stride = str(CONFIG.get('catch').get('probe_stride'))
@@ -461,7 +467,8 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     cluster_id = genome_bin.stem
 
     log.name = 'Probe:CatchDesign'
-    probes_file = catch_design_probes(genome_bin)
+    reuse_existing_probes = CONFIG.get('catch').get('reuse_existing_probe_files')
+    probes_file = catch_design_probes(genome_bin, reuse_existing=reuse_existing_probes)
 
     """probe_blasts is list of all blast matched records (as lists)"""
     log.name = 'Probes:Blast'
