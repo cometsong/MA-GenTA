@@ -110,7 +110,7 @@ def run_cmd(cmd, only_stdout=False):
     """
     try:
         if cmd:
-            log.info('Running subprocess cmd "{}"'.format(' '.join(cmd[:])))
+            log.info('Running subprocess cmd "{}"'.format(cmd))
             output = run(cmd,
                          check=True,
                          stdout=PIPE,
