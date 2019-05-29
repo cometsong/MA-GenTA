@@ -16,6 +16,7 @@
 [catch]
   probe_length = 40
   probe_stride = 20
+  reuse_existing_probe_files = false
 
 [paths]
   # Where are your source data files? Where do you want the resulting files located?
