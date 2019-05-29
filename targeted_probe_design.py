@@ -356,8 +356,6 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         filter_view = DB_CFG.get('probes_view').get('name')
 
         field_list = DB_CFG.get('probes_view').get('cols').copy()
-        musicc_col = DB_CFG.get('musicc_boolean')
-        field_list.append(musicc_col)
         field_sql = ', '.join(field_list)
 
         gc_min = CONFIG.get('general').get('gc').get('min_percent')
@@ -455,10 +453,16 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
     log.notice('Generating targeted probes for genome bin: {}'.format(genome_bin.name))
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
-    musicc_col = DB_CFG.get('musicc_boolean')
-    blast_header = CONFIG.get('blastn').get('fields').copy()
-    blast_header.extend([ 'gc_pct', musicc_col ])
-    # log.debug('blast_header fields: {}'.format(blast_header))
+    blast_header = list(DB_CFG.get('probes_table').get('cols').keys())
+    # blast_header.extend([ 'gc_pct', 'is_musicc' ])
+    blast_extras = CONFIG.get('blastn').get('fields').copy()
+
+    """add in extra non-default blastn fields to the column list without datatype"""
+    blastn_fields = CONFIG.get('blastn').get('fields').copy()
+    for fld in blast_extras:
+        if fld not in blast_header:
+            blast_header.append(fld)
+    log.debug('blast_header fields: {}'.format(blast_header))
 
     blastdb = blastdb or makeblastdb(genome_bin)
     cluster_id = genome_bin.stem
