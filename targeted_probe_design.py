@@ -512,7 +512,7 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
 
         """import blast file to cluster database"""
         log.name = 'Probe:ImportBlast'
-        db_name or DB_CFG.get('clusterdb').get('name')
+        db_name = DB_CFG.get('clusterdb').get('name')
         clust_db = working_dir / '_'.join([cluster_id, db_name])
         log.info('Importing blast matches to db "{}"'.format(clust_db))
         import_blasts_to_db(pseqs, db_name=clust_db.abspath)
