@@ -17,7 +17,7 @@ Prior to running this pipeline:
 * catch/design.py - "A package for designing compact and comprehensive capture probe sets."
   * [https://github.com/broadinstitute/catch/](https://github.com/broadinstitute/catch/)
 * ncbi-blast+ for makeblastdb, blastn (used 2.8.1+)
-  * [download *blast+* from ncbi.nlm.nih.gov](ftp://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/)
+  * [download blast+ from NCBI](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/)
 * `clize` required only if pipeline option modification is needed in a separate file.
   * [clize info (ReadTheDocs)](https://clize.readthedocs.io)
   * to install it using pip:  `pip3 install clize`
