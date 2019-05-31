@@ -120,6 +120,9 @@ def read_config_file(config_file=None):
         cfg_opts = {}
         if os.path.exists(config_file):
             cfg_opts = TOMLFile(config_file).read()
+        else:
+            log.notice('Config file "{}" does not exist!?'.format(config_file))
+            return None
     except Exception as e:
         log.exception('Error: {}'.format(e))
         raise e
