@@ -34,17 +34,17 @@
   fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ] # plus others, e.g.: 'mismatch gapopen qstart qend sstart send evalue bitscore'
   # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
 
-[regexes]
-  musicc_regex = [
-    '_asd', '_metK', '_pgk', '_adk', '_eno', '_tpiA', '_tyrS', '_trpS',
-    '_thrS', '_leuS', '_ileS', '_alaS', '_valS', '_metG', '_serS',
-    '_aspS', '_proS', '_cysS', '_argS', '_pheS', '_pheT', '_hisS',
-    '_pyrG', '_tsf', '_infB', '_ksgA', '_nusA', '_nusG', '_prfA',
-    '_frr', '_rpoA', '_secY', '_ffh', '_ftsY', '_mraW', '_rnhB',
-    '_smpB', '_grpE', '_uvrB', '_ychF', '_pyrH', '_nth', '_rsmH',
-    'tRNA_ligase'
+[filters]
+  musicc_list = [
+    'asd', 'metK', 'pgk', 'adk', 'eno', 'tpiA', 'tyrS', 'trpS',
+    'thrS', 'leuS', 'ileS', 'alaS', 'valS', 'metG', 'serS',
+    'aspS', 'proS', 'cysS', 'argS', 'pheS', 'pheT', 'hisS',
+    'pyrG', 'tsf', 'infB', 'ksgA', 'nusA', 'nusG', 'prfA',
+    'frr', 'rpoA', 'secY', 'ffh', 'ftsY', 'mraW', 'rnhB',
+    'smpB', 'grpE', 'uvrB', 'ychF', 'pyrH', 'nth', 'rsmH',
+    'tRNA.ligase'
   ]
-  trna_regex = [
+  trna_list = [
     '50S', '5S', '16S', '30S', '23S', 'repeat', 'tRNA-Ala', 'tRNA-Arg',
     'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln',
     'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys',

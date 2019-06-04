@@ -56,7 +56,9 @@ _DEFAULT_CONFIG_TOML = """
     # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
 
 [filters]
-    musicc_list = [ '_asd', '_metK', '_pgk', '_adk', '_eno', '_tpiA', '_tyrS', '_trpS', '_thrS', '_leuS', '_ileS', '_alaS', '_valS', '_metG', '_serS', '_aspS', '_proS', '_cysS', '_argS', '_pheS', '_pheT', '_hisS', '_pyrG', '_tsf', '_infB', '_ksgA', '_nusA', '_nusG', '_prfA', '_frr', '_rpoA', '_secY', '_ffh', '_ftsY', '_mraW', '_rnhB', '_smpB', '_grpE', '_uvrB', '_ychF', '_pyrH', '_nth', '_rsmH', 'tRNA_ligase',]
+    # musicc_list contains expressions to match the annotation's sequence id's. Use any python.re regex characters or sets.
+    begin_regex = '[ _|\.]' # will be placed at beginning of musicc match pattern to account for some prokka files and blastdbs different space-replacements
+    musicc_list = [ 'asd', 'metK', 'pgk', 'adk', 'eno', 'tpiA', 'tyrS', 'trpS', 'thrS', 'leuS', 'ileS', 'alaS', 'valS', 'metG', 'serS', 'aspS', 'proS', 'cysS', 'argS', 'pheS', 'pheT', 'hisS', 'pyrG', 'tsf', 'infB', 'ksgA', 'nusA', 'nusG', 'prfA', 'frr', 'rpoA', 'secY', 'ffh', 'ftsY', 'mraW', 'rnhB', 'smpB', 'grpE', 'uvrB', 'ychF', 'pyrH', 'nth', 'rsmH', 'tRNA.ligase',]
     trna_list = [ '50S', '5S', '16S', '30S', '23S', 'tRNA-Ala', 'tRNA-Arg', 'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln', 'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys', 'tRNA-Met', 'tRNA-Phe', 'tRNA-Pro', 'tRNA-Ser', 'tRNA-Thr', 'tRNA-Trp', 'tRNA-Tyr', 'tRNA-val', 'repeat', 'hypothetical',]
 
 [APPS]

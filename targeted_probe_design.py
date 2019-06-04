@@ -386,15 +386,18 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         raise e
 
 
-################################# Regex MUSiCC single vs. multi-copy genes #####
-def generate_musicc_regex(musiccs=None):
+#~~~~~~~~~~~~~~~~~~~~ Genereate and Compile Regex pattern from MUSiCC list ~~~~~
+def generate_musicc_regex(musiccs=None, begin_regex=None):
     """Generate regex pattern for matching MUSiCC patterns.
     List of patterns can be passed or is read from config file.
+    'begin_regex' can be character class or other `re` at beginning of pattern.
     """
     try:
         musiccs = musiccs or CONFIG.get('filters').get('musicc_list')
+        bgn = begin_regex or CONFIG.get('filters').get('begin_regex')
         log.debug('MUSiCC check list: "{}"'.format(musiccs))
-        mpatt = '(' +'|'.join(musiccs)+ ')'
+        mpatt = f'{bgn}(' +'|'.join(musiccs)+ ')'
+        log.debug('MUSiCC check pattern: "{}"'.format(mpatt))
         muser = re.compile(mpatt)
         return muser
     except Exception as e:
