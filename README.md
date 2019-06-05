@@ -21,8 +21,6 @@ or for modified configuration options:
 
 
 ### Application requirements:
-- **Python3**
-  * [&gt;= v3.6](https://www.python.org/downloads/)
 - **catch/design.py** &gt;= 1.2.0
   * "A package for designing compact and comprehensive capture probe sets."
   * [github.com/broadinstitute/catch](https://github.com/broadinstitute/catch/)
@@ -30,10 +28,16 @@ or for modified configuration options:
   * [ftp.ncbi.nlm.nih.gov](https://ftp.ncbi.nlm.nih.gov/blast/executables/blast+/)
 - **sqlite3** database client
   * [sqlite.org](https://sqlite.org/)
-- **clize** required *only* if pipeline option modification is needed in a separate file.
-  * [clize info (ReadTheDocs)](https://clize.readthedocs.io)
-  * to install it using *pip*:  `pip3 install clize`
-  * Once installed, add `--config-file <filename.toml>` to your command line
+- **Python3**
+  * [&gt;= v3.6](https://www.python.org/downloads/)
+  * modules:
+    - **logbook**: for logging to screen and file ( `pip3 install logbook` )
+    - **tomlkit**: used for all config options    ( `pip3 install tomlkit` )
+    - **clize** required *only* if pipeline option modification is needed in a separate file.
+      * [clize info (ReadTheDocs)](https://clize.readthedocs.io)
+      * to install: `pip3 install clize`
+      * Once installed, add `--config-file <filename.toml>`
+        to your command line for run-specific options
 
 ## License
 This app is licensed under the terms of the [MIT license](./LICENSE).
