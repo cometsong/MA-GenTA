@@ -435,19 +435,18 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
             next
 
         if random_picks:
-            record_count = record_count if record_count >= final_amount else final_amount
-            row_nums = random.sample(range(1, record_count+1), k=final_amount)
+            final_amount = final_amount if record_count >= final_amount else record_count
+            row_nums = random.sample(range(record_count), k=final_amount)
         else:
-            row_nums = [r for r in range(1, final_amount+1)]
+            row_nums = [r for r in range(final_amount)]
         log.debug(' ... row_nums: {}'.format(row_nums))
 
         probes_selector = Sdb.iter_select(dbname, filter_view, where=whim, fields=final_fields)
 
         log.info(f'Exporting to file {export_file}')
-        # export_rows = [row for num, row in enumerate(probes_selector) if num in row_nums]
         for row in [row for num, row in enumerate(probes_selector) if num in row_nums]:
             seq = row.pop('probe_seq') # NB: presumption of column name 'probe_seq' in filter view!!
-            head = '>' + ';'.join([str(v) for v in row.values()])
+            head = '>' + '|'.join([str(v) for v in row.values()])
             probe_fasta = os.linesep.join([head, seq, '']) # final '' elem appends EOL
             log.debug(f' ... writing to file {export_file}: "{probe_fasta}"')
             write_out_file(probe_fasta, export_file, mode='a')
