@@ -5,8 +5,6 @@ import csv
 from .log import log
 from .utils import load_csv_data, write_csv_dict
 
-__author__ = 'Benjamin Leopold <bleopold@jax.org>'
-
 
 class SqliteIO():
     """Library of Sqlite DB I/O methods"""

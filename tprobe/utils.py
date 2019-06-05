@@ -8,8 +8,6 @@ import csv
 
 from .log import log
 
-__author__ = 'Benjamin Leopold <bleopold@jax.org>'
-
 
 def pct_gc(seq, points=2):
     """return percent GC of sequence (2 decimal points)"""

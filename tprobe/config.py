@@ -9,8 +9,6 @@ from .log import log
 from .utils import write_out_file
 # from .abspath import AbsPath
 
-__author__ = 'Benjamin Leopold <bleopold@jax.org>'
-
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~
 """give all options default values, to be later customized in config file"""

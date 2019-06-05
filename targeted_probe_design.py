@@ -41,7 +41,7 @@ except ImportError:
     log.notice('Using default configuration. (Module "clize" not installed to read command line.)')
     run = lambda *args: main_pipe()
 
-__author__ = 'Benjamin Leopold <bleopold@jax.org>'
+__author__ = 'Benjamin Leopold'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Pipeline Functions ~~~~~
 

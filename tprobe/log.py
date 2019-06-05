@@ -5,8 +5,6 @@ import logbook
 from logbook import Logger, FileHandler
 from logbook.more import ColorizedStderrHandler
 
-__author__ = 'Benjamin Leopold <bleopold@jax.org>'
-
 logbook.set_datetime_format('local')
 
 log_name = 'Targeted_Pipeline'

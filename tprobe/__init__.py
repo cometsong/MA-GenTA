@@ -16,3 +16,5 @@ __all__ = [
     write_config_file,
 ]
 
+__author__ = 'Benjamin Leopold'
+
