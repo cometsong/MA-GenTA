@@ -118,15 +118,15 @@ def read_config_file(config_file=None):
     if not config_file:
         config_file = DEFAULT_CONFIG_FILE
     try:
-        log.info('Reading config file: {}'.format(config_file))
+        log.info(f'Reading config file: {config_file}')
         cfg_opts = {}
         if os.path.exists(config_file):
             cfg_opts = TOMLFile(config_file).read()
         else:
-            log.notice('Config file "{}" does not exist!?'.format(config_file))
+            log.notice(f'Config file "{config_file}" does not exist!?')
             return None
     except Exception as e:
-        log.exception('Error: {}'.format(e))
+        log.exception(f'Error: {e}')
         raise e
     else:
         return cfg_opts
@@ -137,11 +137,10 @@ def write_config_file(config_dict, filepath):
     Note: param 'filepath' is expected to be AbsPath instance.
     """
     try:
-        log.info('Writing to config file: {}'.format(filepath.abspath))
-        log.info('Writing to config file2: {}'.format(filepath))
+        log.info(f'Writing to config file: {filepath.abspath}')
         toml_config = tomlkit.dumps(config_dict)
         write_out_file(toml_config, filepath)
     except Exception as e:
-        log.exception('Error: {}'.format(e))
+        log.exception(f'Error: {e}')
         raise e
 

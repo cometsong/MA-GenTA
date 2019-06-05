@@ -31,7 +31,7 @@ def read_fasta(fasta_file):
                     seq.append(line)
             if name: yield (name, ''.join(seq))
     except Exception as e:
-        log.error('Error reading fasta sequence. {}'.format(e.args))
+        log.error(f'Error reading fasta sequence. {e.args}')
         raise e
 
 
@@ -62,18 +62,18 @@ def sed_inplace(filename, pattern, repl):
         shutil.copystat(filename, tmp_file.name)
         shutil.move(tmp_file.name, filename)
     except Exception as e:
-        log.error('Error replacing in sed_inplace. {}'.format(e.args))
+        log.error(f'Error replacing in sed_inplace. {e.args}')
         raise e
 
 
 def replace_spaces(filepath, replace='_'):
     """replace spaces in text file"""
-    log.info('Replacing spaces in: {}'.format(filepath))
+    log.info(f'Replacing spaces in: {filepath}')
     try:
         find = r' '
         sed_inplace(filepath, find, replace)
     except Exception as e:
-        log.error('Error. {}'.format(e.args))
+        log.error(f'Error. {e.args}')
         raise e
     else:
         return filepath
@@ -97,7 +97,7 @@ def concatenate_files(filepath, destfile, suffix='', clobber=False):
                 with open(b) as bff:
                     dest.write(bff.read())
     except Exception as e:
-        log.error('Error: {}'.format(e.args))
+        log.error(f'Error: {e.args}')
         raise e
     else:
         return destfile
@@ -110,7 +110,7 @@ def run_cmd(cmd, only_stdout=False):
     """
     try:
         if cmd:
-            log.info('Running subprocess cmd "{}"'.format(cmd))
+            log.info(f'Running subprocess cmd "{cmd}"')
             output = run(cmd,
                          check=True,
                          stdout=PIPE,
@@ -122,11 +122,11 @@ def run_cmd(cmd, only_stdout=False):
     except IndexError:
         return None
     except CalledProcessError as e:
-        log.error('From command: {}'.format(e.cmd))
+        log.error(f'From command: {e.cmd}')
         log.error(e.output)
         raise e
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
     else:
         return output
@@ -138,7 +138,7 @@ def load_csv_data(csv_file, fields=None, skip_rows=None,
     Use fields arg as keys, or read from 'csv_file'.
     Skip number of (header) row(s) at top of file (default None)
     """
-    log.info('Loading data from "{}"'.format(csv_file))
+    log.info(f'Loading data from "{csv_file}"')
     try:
         with open(csv_file, 'r') as csvfh:
             reader = csv.DictReader(csvfh,
@@ -148,19 +148,18 @@ def load_csv_data(csv_file, fields=None, skip_rows=None,
                                     quotechar=quotechar)
             try:
                 if isinstance(skip_rows, int):
-                    log.info('Skipping top rows: {}.'.format(int(skip_rows)))
+                    log.info(f'Skipping top rows: {int(skip_rows)!s}.')
                     [next(reader) for r in range(skip_rows)]
             except csv.Error as e:
-                log.error('Skipping rows in "{}": {}'.format(csv_file,  e))
+                log.error(f'Skipping rows in "{csv_file}": { e}')
 
             try:
                 for row in reader:
                     yield row
             except csv.Error as e:
-                log.error('Reading CSV file "{}" line {}: {}'.format(
-                              csv_file, reader.line_num, e))
+                log.error(f'Reading CSV file "{csv_file}" line {reader.line_num}: {e}')
     except Exception as e:
-        log.error('Reading CSV file {}: {}'.format(csv_file, e))
+        log.error(f'Reading CSV file {csv_file}: {e}')
         raise e
 
 
@@ -171,7 +170,7 @@ def csv_type_sniff(csv_file):
             dialect = csv.Sniffer().sniff(f.read(1024))
             return dialect
     except Exception as e:
-        log.error('Reading CSV file {}: {}', csv_file, e.args)
+        log.error('Reading CSV file {csv_file}: {e.args}')
         raise e
 
 
@@ -199,7 +198,7 @@ def write_csv_dict(csv_file, fieldnames=[], values=[],
                 fieldnames = list(values.pop(0))
             except Exception:
                 fieldnames = None
-        log.notice('fieldnames {}'.format(fieldnames))
+        log.notice(f'fieldnames {fieldnames}')
 
         with open(csv_file, 'w') as csvout:
             writer = csv.DictWriter(csvout,
@@ -210,23 +209,23 @@ def write_csv_dict(csv_file, fieldnames=[], values=[],
                                     extrasaction='ignore')
 
             if not skip_header:
-                log.info('Writing header to {}'.format(csv_file))
+                og.info(f'Writing header to {csv_file}')
                 writer.writeheader()
 
             if values:
-                log.info('Writing data to {}'.format(csv_file))
+                log.info(f'Writing data to {csv_file}')
                 try:
                     for row in values:
                         writer.writerow(row)
                 except Exception as e:
-                    log.error('Error writing CSV file {}: {}'.format(csv_file, e.args))
+                    log.error(f'Error writing CSV file {csv_file}: {e.args}')
                     raise e
         return True
     except csv.Error as e:
-        log.error('Error writing CSV file {}: {}'.format(csv_file, e.args))
+        log.error(f'Error writing CSV file {csv_file}: {e.args}')
         raise e
     except Exception as e:
-        log.error('Error writing CSV file {}'.format(e.args))
+        log.error(f'Error writing CSV file {e.args}')
         raise e
 
 
@@ -248,17 +247,17 @@ def write_out_csv(csv_file, values:list, append=True, quoting=False,
             if skip_header:
                 values.remove(0)
             try:
-                log.info('Writing data to {}'.format(csv_file))
+                log.info(f'Writing data to {csv_file}')
                 for row in values:
                     writer.writerow(row)
             except Exception as e:
-                log.error('Error writing CSV file {}: {}'.format(csv_file, e.args))
+                log.error(f'Error writing CSV file {csv_file}: {e.args}')
                 raise e
     except csv.Error as e:
-        log.error('Error writing CSV file {}: {}'.format(csv_file, e.args))
+        log.error(f'Error writing CSV file {csv_file}: {e.args}')
         raise e
     except Exception as e:
-        log.error('Error writing CSV file {}'.format(e.args))
+        log.error(f'Error writing CSV file {e.args}')
         raise e
 
 
@@ -270,7 +269,7 @@ def write_out_file(contents, filename, mode='w'):
         with open(filename, mode) as f:
             f.write(contents)
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         return None
     else:
         return filename

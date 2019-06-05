@@ -54,41 +54,41 @@ def check_options():
         path_opts = CONFIG.get('paths')
 
         path = 'working_dir'
-        log.info('Checking "{}"'.format(path))
+        log.info(f'Checking "{path}"')
         ppath = APath(path_opts.get(path))
         if ppath.is_dir():
-            log.info('Path: "{}" directory found.'.format(ppath.name))
+            log.info(f'Path: "{ppath.name}" directory found.')
         else:
-            log.warning('Path for "{}" directory not found!'.format(ppath.name))
+            log.warning(f'Path for "{ppath.name}" directory not found!')
             try:
                 ppath.mkdir(parents=True, exist_ok=True)
-                log.notice('Path: "{}" directory created.'.format(ppath.abspath))
+                log.notice(f'Path: "{ppath.abspath}" directory created.')
             except FileExistsError as e:
                 log.error('File/dir exists.')
                 raise e
         path_opts[path] = ppath.abspath
 
         path = 'genome_bins'
-        log.info('Checking "{}"'.format(path))
+        log.info(f'Checking "{path}"')
         ppath = APath(path_opts.get(path), '')
-        assert ppath.is_dir(), 'Path "{}" is not found!'.format(ppath)
-        log.info('Path: "{}" file found.'.format(ppath.abspath))
+        assert ppath.is_dir(), f'Path "{ppath}" is not found!'
+        log.info(f'Path: "{ppath.abspath}" file found.')
         path_opts[path] = ppath.abspath
 
         path = 'use_blastdb'
         ppath = path_opts.get(path)
         if ppath:
-            log.info('Checking "{}"'.format(path))
+            log.info(f'Checking "{path}"')
             ppath = APath(path_opts.get(path), '')
-            assert ppath.is_file(), 'Path "{}" is not a file!'.format(ppath)
-            log.info('Path: "{}" file found.'.format(ppath.abspath))
+            assert ppath.is_file(), f'Path "{ppath}" is not a file!'
+            log.info(f'Path: "{ppath.abspath}" file found.')
             path_opts[path] = ppath.abspath
         else:
             path = 'prokka_dir'
-            log.info('Checking "{}"'.format(path))
+            log.info(f'Checking "{path}"')
             ppath = APath(path_opts.get(path), '')
-            assert ppath.is_dir(), 'Path "{}" is not found!'.format(ppath)
-            log.info('Path: "{}" file found.'.format(ppath.abspath))
+            assert ppath.is_dir(), f'Path "{ppath}" is not found!'
+            log.info(f'Path: "{ppath.abspath}" directory found.')
             path_opts[path] = ppath.abspath
 
     except AssertionError as e:
@@ -105,13 +105,13 @@ def check_options():
     cmd_exists = lambda x: shutil.which(x) is not None
     try:
         log.info('Checking applications usable.')
-        log.debug('PATH="{}"'.format(os.environ.get("PATH")))
+        log.debug(f'PATH=\"{os.environ.get("PATH")}\"')
         for opt, app in apps.items():
-            log.notice('App for: "{}"'.format(opt))
+            log.notice(f'App for: "{opt}"')
             if cmd_exists(app):
-                log.info('App: "{}" found.'.format(app))
+                log.info(f'App: "{app}" found.')
             else:
-                log.warning('App: "{}" is not found?!'.format(app))
+                log.warning(f'App: "{app}" is not found?!')
     except Exception as e:
         raise e
 
@@ -126,23 +126,22 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
     srce_dir = prokka_dir or APath(CONFIG.get('paths').get('prokka_dir'))
     dest_dir = dest_dir or APath(CONFIG.get('paths').get('working_dir'))
     log.info('Copying and processing Prokka ffn files '
-             'from {} into {}'.format(srce_dir, dest_dir))
+             'from {srce_dir} into {dest_dir}f')
     dest_files = []
-    assert next(srce_dir.glob('*'+suffix)),     'No matching files in the dir "{}"'.format(srce_dir.abspath)
+    assert next(srce_dir.glob('*'+suffix)), f'No matching files in the dir "{srce_dir.abspath}"'
     for ffn in srce_dir.glob('*'+suffix):
-        log.info('Copying {}'.format(ffn.name))
+        log.info(f'Copying {ffn.name}')
         try:
             dst_fn = dest_dir / ffn.name
             dest_files.append(shutil.copyfile(ffn, dst_fn))
-            log.info('Prepending "{}" into sequence headers'.format(ffn.stem))
-            sed_inplace(dst_fn, r'^>', '>{}_'.format(ffn.stem))
+            log.info(f'Prepending "{ffn.stem}" into sequence headers')
+            sed_inplace(dst_fn, r'^>', f'>{ffn.stem}_')
             replace_spaces(dst_fn, '_')
         except IOError as e:
-            log.error('IOError, copying "{}" to "{}": {}'.format(
-                          e.filename, e.filename2, e))
+            log.error(f'IOError, copying "{e.filename}" to "{e.filename2}": {e}')
             raise e
         except Exception as e:
-            log.error('Error: {}'.format(e))
+            log.error(f'Error: {e}')
             raise e
     return dest_files
 
@@ -151,7 +150,7 @@ def makeblastdb(fastaname, blast_db=None):
     """make blast db from fasta file
     Requires: [makeblastdb]
     """
-    log.info('Making blastdb for {}'.format(fastaname))
+    log.info(f'Making blastdb for {fastaname}')
     try:
         dest_db = blast_db or fastaname
         mkblastdb = CONFIG.get('APPS').get('blastdb')
@@ -163,7 +162,7 @@ def makeblastdb(fastaname, blast_db=None):
                ]
         output = run_cmd(cmd)
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
     else:
         return output
@@ -175,7 +174,7 @@ def make_blacklist(fasta_path, gbin_name, suffix='fasta'):
     """make blacklist fasta file of all 'unwanted' seqs
     i.e. all but the single genome bin fasta
     """
-    log.info('Making blacklist for {}'.format(gbin_name))
+    log.info(f'Making blacklist for {gbin_name}')
     try:
         fpath = APath(fasta_path)
         blacks = [f for f in fpath.glob('*'+suffix)
@@ -191,7 +190,7 @@ def make_blacklist(fasta_path, gbin_name, suffix='fasta'):
                     blck.write(bff.read())
         return blacklist
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
 
 
@@ -205,7 +204,7 @@ def make_blacklists(filepath, suffix='fasta'):
             blacklists.append( make_blacklist(fpath, fa.name) )
         return blacklists
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
 
 
@@ -216,20 +215,19 @@ def catch_design_probes(gbin, dest_dir=None, reuse_existing=False):
     Requires: [catch]
     Note: file, dir args should be 'APath' instances
     """
-    log.info('Designing probes for {}'.format(gbin.name))
-     
+    log.info(f'Designing probes for {gbin.name}')
+
     dest_dir = dest_dir or APath(CONFIG.get('paths').get('working_dir'))
-    # log.notice('reuse_existing: {}'.format(reuse_existing))
+    # log.notice(f'reuse_existing: {reuse_existing}')
     try:
         catch_app = CONFIG.get('APPS').get('catch')
 
         # insert '.probes' into outfile and log names
-        # probe_out = dest_dir / '{}.{}{}'.format(gbin.stem, 'probes', gbin.suffix) #TODO: check for '.' begin suffix
         probe_out = dest_dir / '.'.join([gbin.stem, 'probes', gbin.suffix[1:]])
-        catch_tsv = dest_dir / '{}.probe_coverage_analysis.tsv'.format(gbin.stem)
+        catch_tsv = dest_dir / f'{gbin.stem}.probe_coverage_analysis.tsv'
 
         if reuse_existing and probe_out.exists():
-            log.info('Using pre-existing cluster probes file "{}"'.format(probe_out))
+            log.info(f'Using pre-existing cluster probes file "{probe_out}"')
             return probe_out
 
         opt_probe_length = str(CONFIG.get('catch').get('probe_length'))
@@ -243,10 +241,10 @@ def catch_design_probes(gbin, dest_dir=None, reuse_existing=False):
                ]
         output = run_cmd(cmd)
 
-        log.info('Prepending clusterID to seq headers in {}'.format(probe_out))
-        sed_inplace(probe_out, r'^>', '>{}_'.format(gbin.stem))
+        log.info(f'Prepending clusterID to seq headers in {probe_out}')
+        sed_inplace(probe_out, r'^>', f'>{gbin.stem}_')
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
     else:
         return probe_out
@@ -258,7 +256,7 @@ def blast_clust_probes_on_genome(probe_file, blastdb):
     """Run 'blastn' of cluster's probe fasta on genome blastdb.
     Note: probe_file be 'APath' instance, blastdb param is string of filename or filepath.
     """
-    log.info('Blasting cluster''s probes ({}) on genome db {}'.format(probe_file, blastdb))
+    log.info(f'Blasting cluster''s probes ({probe_file}) on genome db {blastdb}')
     try:
         blastn = CONFIG.get('APPS').get('blastn')
         dust   = CONFIG.get('blastn').get('dust', 'no')
@@ -273,7 +271,7 @@ def blast_clust_probes_on_genome(probe_file, blastdb):
         field_fmt = ' '.join(fields)
 
         if not probe_file.is_file():
-            err_msg = 'Path: "{}" is not a file?!'.format(probe_file.abspath)
+            err_msg = f'Path: "{probe_file.abspath}" is not a file?!'
             log.warning(err_msg)
             return err_msg
 
@@ -285,18 +283,18 @@ def blast_clust_probes_on_genome(probe_file, blastdb):
                '-evalue', evalue,
                '-num_alignments', numaln,
                '-num_threads', numcpu,
-               '-outfmt', '{} {}'.format(outfmt, field_fmt),
+               '-outfmt', f'{outfmt} {field_fmt}',
                ]
         output = run_cmd(cmd, only_stdout=True)
         log.notice('blast output: '+output[0:100])
 
         """blast_rows is rows of all output: here conv'd to list of list-per-line"""
         blast_rows = [ row.split(',') for row in output.splitlines() ]
-        # log.notice('show blast_rows[0]: {}'.format(blast_rows[0]))
-        log.info('Number of blast matches: {}'.format(len(blast_rows)))
+        # log.notice(f'show blast_rows[0]: {blast_rows[0]}')
+        log.info(f'Number of blast matches: {len(blast_rows)}')
 
     except Exception as e:
-        log.error('Error: {}'.format(e))
+        log.error(f'Error: {e}')
         raise e
     else:
         return blast_rows
@@ -320,10 +318,10 @@ def import_blasts_to_db(blast_hit_list, db_name=None, table_name=None):
             table_cols[fld] = '' # empty datatypes
 
     col_defs = ', '.join([' '.join(t) for t in table_cols.items()])
-    ddl_table = 'CREATE TABLE IF NOT EXISTS {} ({});'.format(table_name, col_defs)
+    ddl_table = f'CREATE TABLE IF NOT EXISTS {table_name} ({col_defs});'
     create_table = Sdb.exec_ddl(db, ddl_table)
 
-    ddl_index = 'CREATE INDEX IF NOT EXISTS {} ON {} ({});'.format('probes_idx', table_name, index_cols)
+    ddl_index = f'CREATE INDEX IF NOT EXISTS "probes_idx" ON {table_name} ({index_cols});'
     create_index = Sdb.exec_ddl(db, ddl_index)
 
     import_success = Sdb.import_data(blast_hit_list, db, table=table_name)
@@ -347,7 +345,7 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         - not match tRNA names
     """
     try:
-        log.info('Filtering headers in db view for {}'.format(dbname))
+        log.info(f'Filtering headers in db view for {dbname}')
 
         db = dbname or DB_CFG.get('name')
         table_name = table_name or DB_CFG.get('probes_table').get('name')
@@ -361,26 +359,26 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         probe_length = CONFIG.get('general').get('probe_length')
 
         trna_list = CONFIG.get('filters').get('trna_list')
-        trna_wheres = [ 'sseqid NOT LIKE "%{}%"'.format(t) 
-                       for t in trna_list ]
+        trna_wheres = [ f'sseqid NOT LIKE "%{t}%"' for t in trna_list ]
         trna_where_def = ' AND ('+ ' AND '.join(trna_wheres) +')'
 
-        wheres = ['{} between "{}" and "{}"'.format('gc_pct', gc_min, gc_max),
-                  '{}={}'.format('pident', 100),
-                  '{}={}'.format('length', probe_length),
-                  'qseqid like "{}%"'.format(cluster_id),
+        wheres = [f'gc_pct between "{gc_min}" and "{gc_max}"',
+                  'pident=100',
+                  f'length={probe_length}f',
+                  f'qseqid like "{cluster_id}%"f',
                   ] + trna_wheres
         where_def = ' AND '.join(wheres) + trna_where_def
-        group_def = '{} HAVING count({})=1'.format('qseqid', 'qseqid')
+        group_def = 'qseqid HAVING count(qseqid)=1'
 
-        ddl_view = 'DROP VIEW IF EXISTS {};'.format(filter_view)
-        ddl_view = 'CREATE VIEW {} AS SELECT {} FROM {} WHERE {} GROUP BY {};' \
-                   ''.format(filter_view, field_sql, table_name, where_def, group_def) 
-        # log.debug('filtering view query: "{}"'.format(ddl_view))
+        ddl_view = f'DROP VIEW IF EXISTS {filter_view};'
+        ddl_view = (f'CREATE VIEW {filter_view} AS'
+                    f'SELECT {field_sql} FROM {table_name}'
+                    f'WHERE {where_def} GROUP BY {group_def};')
+        # log.debug(f'filtering view query: "{ddl_view}"')
         create_success = Sdb.exec_ddl(db, ddl_view)
         return create_success
     except Exception as e:
-        log.error('Writing to db "{}": {}'.format(db, e))
+        log.error(f'Writing to db "{db}": {e}')
         raise e
 
 
@@ -393,22 +391,22 @@ def generate_musicc_regex(musiccs=None, begin_regex=None):
     try:
         musiccs = musiccs or CONFIG.get('filters').get('musicc_list')
         bgn = begin_regex or CONFIG.get('filters').get('begin_regex')
-        log.debug('MUSiCC check list: "{}"'.format(musiccs))
+        log.debug(f'MUSiCC check list: "{musiccs}"')
         mpatt = f'{bgn}(' +'|'.join(musiccs)+ ')'
-        log.debug('MUSiCC check pattern: "{}"'.format(mpatt))
+        log.debug(f'MUSiCC check pattern: "{mpatt}"')
         muser = re.compile(mpatt)
         return muser
     except Exception as e:
-        log.error('Generating MUSiCC regex match: {}'.format(e))
+        log.error(f'Generating MUSiCC regex match: {e}')
         raise e
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~ Select Random Probe Seqs from Final Filtered Set ~~~~~
 def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
     """Export final sets of (possibly random) probe sequences into fasta format;
-    one file for 'musicc', one for non. 
+    one file for 'musicc', one for non.
     """
-    log.info('Exporting probes for {}'.format(cluster_id))
+    log.info(f'Exporting probes for {cluster_id}')
 
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
     final_amount = int(final_probe_amount) or int(CONFIG.get('general').get('final_probe_amount'))
@@ -425,7 +423,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
 
         record_count = Sdb.iter_select(dbname, filter_view, where=whim, fields='count(*) as recs')
         record_count = next(record_count).pop('recs')
-        log.debug(' ... record_count: {}'.format(record_count))
+        log.debug(f' ... record_count: {record_count}')
 
         if record_count == 0:
             log.notice(f'No filtered "{which}" probes for cluster "{cluster_id}".')
@@ -437,7 +435,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
             row_nums = random.sample(range(record_count), k=final_amount)
         else:
             row_nums = [r for r in range(final_amount)]
-        log.debug(' ... row_nums: {}'.format(row_nums))
+        log.debug(f' ... row_nums: {row_nums}')
 
         probes_selector = Sdb.iter_select(dbname, filter_view, where=whim, fields=final_fields)
 
@@ -453,7 +451,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
 #~~~ Generate/Process/Filter/Export Probe Sequences for Cluster Genome Bin ~~~~~
 def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
-    log.notice('Generating targeted probes for genome bin: {}'.format(genome_bin.name))
+    log.notice(f'Generating targeted probes for genome bin: {genome_bin.name}')
     working_dir = APath(CONFIG.get('paths').get('working_dir'))
     blast_header = DB_CFG.get('blastn').get('fields').copy()
     blast_extras = CONFIG.get('blastn').get('fields').copy()
@@ -485,14 +483,14 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     for header, seq in read_fasta(probes_file):
         qid = header.replace('>','')
         if qid in probe_ids:
-            log.info('Processing probe seq id: "{}"'.format(qid))
+            log.info(f'Processing probe seq id: "{qid}"')
             for pb in probe_blasts:
                 if pb[0] == qid:
                     if pb[0] not in probes_gc:
-                        log.debug(' ... Calc GC% on "{}"'.format(qid))
+                        log.debug(f' ... Calc GC% on "{qid}"')
                         probes_gc[pb[0]] = pct_gc(seq)
                     pb.append( probes_gc[pb[0]] )
-                    log.debug(' ... Check MUSiCC on "{}"'.format(pb[1]))
+                    # log.debug(f' ... Check MUSiCC on "{pb[1]}"')
                     is_musicc = 1 if musicc_re.search(pb[1]) else 0
                     pb.append( is_musicc )
 
@@ -510,13 +508,13 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
         for vals in probe_blasts:
             vals_dict = {f:v for (f,v) in zip(probe_fields, vals)}
             pseqs.append(vals_dict)
-        log.debug('len pseqs: {}'.format(len(pseqs)))
+        log.debug(f'len pseqs: {len(pseqs)}')
 
         """import blast file to cluster database"""
         log.name = 'Probe:ImportBlast'
         db_name = DB_CFG.get('clusterdb').get('name')
         clust_db = working_dir / '_'.join([cluster_id, db_name])
-        log.info('Importing blast matches to db "{}"'.format(clust_db))
+        log.info(f'Importing blast matches to db "{clust_db}"')
         import_blasts_to_db(pseqs, db_name=clust_db.abspath)
 
         """Filter resulting table to limits in CONFIG"""
@@ -526,12 +524,12 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
         """Create two views, one for SC, one inverse for MC"""
         log.name = 'Probe:ExportFinals'
         final_probe_amount = CONFIG.get('general').get('final_probe_amount')
-        log.debug(' ... final_probe_amount {}'.format(final_probe_amount))
+        log.debug(f' ... final_probe_amount {final_probe_amount}')
         export_final_sets(clust_db.abspath, cluster_id, final_probe_amount=final_probe_amount)
-        
+
     else:
-        log.notice('Number of fieldnames({}) not equal to' \
-                   'number of values({})!'.format(len(probe_fields), len(probe_blasts[0])))
+        log.notice(f'Number of fieldnames({len(probe_fields)}) not equal to'
+                   f'number of values({len(probe_blasts[0])})!')
 
 
 #~~~~~~~~~ Main Hub: Copy/Modify bin/prokka files, makeblastdb; loop gbins ~~~~~
@@ -571,10 +569,10 @@ def main_pipe(*, config_file:'c'=None, debug=False):
                 use_blastdb_path = APath(use_blastdb)
                 blastdb_name = use_blastdb_path.name
                 with use_blastdb_path.resolve(strict=True):
-                    log.info('Using pre-existing blastdb: {}'.format(use_blastdb_path.abspath))
+                    log.info(f'Using pre-existing blastdb: {use_blastdb_path.abspath}')
                     blast_all_clusters = use_blastdb_path.abspath
             except Exception as e:
-                log.error('Unable to use pre-existing blastdb: {}'.format(use_blastdb))
+                log.error(f'Unable to use pre-existing blastdb: {use_blastdb}')
                 raise e
         else:
             blastdb_name = DB_CFG.get('blastdb').get('name')
@@ -586,7 +584,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
                 prokka_suff = CONFIG.get('general').get('prokka_prediction_suffix')
                 prokka_files = get_metagenome_cluster_prokka(prokka_dir, working_dir, suffix=prokka_suff)
 
-                log.info('Creating blastdb: {}'.format(blastdb_path.abspath))
+                log.info(f'Creating blastdb: {blastdb_path.abspath}')
                 """concat all clusters' prokka_files into one for blasting"""
                 blast_all_clusters = concatenate_files(
                     working_dir.abspath,
@@ -596,7 +594,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
                 )
                 makeblastdb(blast_all_clusters)
             except Exception as e:
-                log.error('Unable to create blastdb: {}'.format(blastdb_name))
+                log.error(f'Unable to create blastdb: {blastdb_name}')
                 raise e
 
         """Design probes for genome bin fastas"""
@@ -605,7 +603,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
             log.name = 'Targeted Pipeline'
             targeted_genome_bin_probes(gbin, blastdb=blast_all_clusters)
     except Exception as e:
-        log.error('Error. {}'.format(e.args))
+        log.error(f'Error. {e.args}')
         raise e
 
     finally:

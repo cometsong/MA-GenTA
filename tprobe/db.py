@@ -15,7 +15,7 @@ class SqliteIO():
     def connect(dbname, row_dict=True):
         """Connect to sqlite db, using Row in factory"""
         try:
-            log.info('Connecting to sqlite db: {}'.format(dbname))
+            log.info(f'Connecting to sqlite db: {dbname}')
             dbkws = {}
             dbkws['detect_types'] = sqlite3.PARSE_DECLTYPES
             con = sqlite3.connect(dbname, **dbkws)
@@ -24,10 +24,10 @@ class SqliteIO():
             else:
                 con.row_factory = sqlite3.Row
         except sqlite3.Error as e:
-            log.error('Connect to db "{}": {}'.format(dbname, e))
+            log.error(f'Connect to db "{dbname}": {e}')
             raise e
         except Exception as e:
-            log.error('Connect to db "{}": {}'.format(dbname, e))
+            log.error(f'Connect to db "{dbname}": {e}')
             raise e
         else:
             return con
@@ -47,7 +47,7 @@ class SqliteIO():
     def iter_select(dbname, table, fields=None, where=None, row_dict=True):
         """Iterate on selected rows from table in dbname"""
         try:
-            log.info('Selecting data from {}'.format(dbname))
+            log.info(f'Selecting data from {dbname}')
             if isinstance(fields, list):
                 field_def = ', '.join(fields)
             elif isinstance(fields, str):
@@ -56,19 +56,17 @@ class SqliteIO():
                 field_def = '*'
 
             where_def = where or '1=1'
-
             select_sql = f'SELECT {field_def} FROM {table} WHERE {where_def};'
-            # select_sql = 'SELECT {} FROM {} WHERE {}'.format(field_def, table, where_def) 
 
             with SqliteIO.connect(dbname, row_dict=row_dict) as db:
-                log.debug('Executing: "{}"'.format(select_sql))
+                log.debug(f'Executing: "{select_sql}"')
                 for row in db.execute(select_sql):
                     yield row
         except sqlite3.Error as e:
-            log.error('Selecting with "{}" in db: {}\n{}'.format(select_sql, dbname, e))
+            log.error(f'Selecting with "{select_sql}" in db: {dbname}\n{e}')
             raise e
         except Exception as e:
-            log.error('Selecting with "{}" in db: {}\n{}'.format(select_sql, dbname, e))
+            log.error(f'Selecting with "{select_sql}" in db: {dbname}\n{e}')
             raise e
         else:
             db.close()
@@ -82,17 +80,17 @@ class SqliteIO():
                 ddl_sql += ';'
             if sqlite3.complete_statement(ddl_sql):
                 with SqliteIO.connect(dbname, row_dict=False) as db:
-                    log.debug('Executing: "{}"'.format(ddl_sql))
+                    log.debug(f'Executing: "{ddl_sql}"')
                     db.execute(ddl_sql)
                     return True
             else:
-                log.error('Can''t execute incomplete sql: "{}"'.format(ddl_sql))
+                log.error(f'Can''t execute incomplete sql: "{ddl_sql}"')
                 return False
         except sqlite3.Error as e:
-            log.error('Defining object "{}" in db: {}\n{}'.format(ddl_sql, dbname, e))
+            log.error(f'Defining object "{ddl_sql}" in db: {dbname}\n{e}')
             raise e
         except Exception as e:
-            log.error('Defining object "{}" in db: {}\n{}'.format(ddl_sql, dbname, e))
+            log.error(f'Defining object "{ddl_sql}" in db: {dbname}\n{e}')
             raise e
         else:
             db.close()
@@ -110,10 +108,10 @@ class SqliteIO():
                 log.error(err_msg)
                 return err_msg
         except IndexError as e:
-            log.error(err_msg+'\n{}'.format(e))
+            log.error(f'{err_msg}\n{e}')
             raise e
         except Exception as e:
-            log.error(err_msg+'\n{}'.format(e))
+            log.error(f'{err_msg}\n{e}')
             raise e
 
         try:
@@ -122,19 +120,18 @@ class SqliteIO():
                 dbcur = db.cursor()
                 sql_cols = ','.join('?' * len(fields))
                 fieldnames = ','.join(fields)
-                sql_insert = 'INSERT INTO {} ({}) VALUES ({});' \
-                             ''.format(table, fieldnames, sql_cols) 
+                sql_insert = f'INSERT INTO {table} ({fieldnames}) VALUES ({sql_cols});'
 
                 for row_num, row in enumerate(data_list, start=1):
                     dbcur.execute( sql_insert, ( list(row.values()) ) )
-                    # log.debug(' ... Inserted row {} into table "{}"'.format(row_num, table))
-                log.info('Inserted {} rows into table "{}"'.format(dbcur.lastrowid, table))
+                    # log.debug(f' ... Inserted row {row_num} into table "{table}"')
+                log.info(f'Inserted {dbcur.lastrowid} rows into table "{table}"')
             log.info('Import session complete.')
         except sqlite3.Error as e:
-            log.error('Importing into db "{}": {}'.format(dbname, e))
+            log.error(f'Importing into db "{dbname}": {e}')
             raise e
         except Exception as e:
-            log.error('Importing into db "{}": {}'.format(dbname, e))
+            log.error(f'Importing into db "{dbname}": {e}')
             raise e
 
 
@@ -146,16 +143,16 @@ class SqliteIO():
         Specify where clause to select, defaults to all.
         """
         try:
-            log.error('Exporting to csv file "{}"'.format(filepath))
+            log.error(f'Exporting to csv file "{filepath}"')
             if os.path.isfile(filepath):
-                selects = SqliteIO.iter_select(dbname, table, fields, where) 
+                selects = SqliteIO.iter_select(dbname, table, fields, where)
                 records = [ row for row in selects ]
                 return write_csv_dict(filepath, values=records, delim=delimiter)
             else:
-                log.error('Exporting to csv file "{}" is not file...'.format(filepath))
+                log.error(f'Exporting to csv file "{filepath}" is not file...')
                 return None
         except Exception as e:
-            log.error('Exporting from db "{}" to file "{}": {}'.format(dbname, filepath, e))
+            log.error(f'Exporting from db "{dbname}" to file "{filepath}": {e}')
             raise e
 
 
@@ -166,7 +163,7 @@ class SqliteIO():
         """
         try:
             if os.path.isfile(filename):
-                log.info('Getting types of fields from {}'.format(filename))
+                log.info(f'Getting types of fields from {filename}')
                 ftypes = {}
                 with open(filename, 'r') as csvfh:
                     dreader = csv.DictReader(csvfh, delimiter=delim)
@@ -175,7 +172,7 @@ class SqliteIO():
 
                 for f in fields:
                     if not data[f]:
-                        log.notice('field: {}'.format(f))
+                        log.notice(f'field: {f}')
                         continue
                     if data[f].isdigit():
                         ftypes[f] = 'INTEGER'
@@ -185,10 +182,10 @@ class SqliteIO():
                         ftypes[f] = 'TEXT'
                 return ftypes
             else:
-                log.warning('Fieldtypes: "{}" not a file?'.format(filename))
+                log.warning(f'Fieldtypes: "{filename}" not a file?')
                 return {}
         except Exception as e:
-            log.error('Getting fieldtypes from "{}"; {}'.format(filename, e))
+            log.error(f'Getting fieldtypes from "{filename}"; {e}')
             raise e
 
 
@@ -211,10 +208,10 @@ class SqliteIO():
 
                 if os.path.isfile(filename):
                     field_datatypes = SqliteIO.get_csv_field_datatypes(filename, delim=delim)
-                    log.notice('length fields: {}'.format(len(fields)))
+                    log.notice(f'length fields: {len(fields))}')
                     if not fields:
                         fields = field_datatypes.keys()
-                        log.notice('length fields: {}'.format(len(fields)))
+                        log.notice(f'length fields: {len(fields)}')
 
                     if len(field_datatypes):
                         fld_types = {}
@@ -226,13 +223,12 @@ class SqliteIO():
                         col_defs = ', '.join([' '.join(t) for t in fld_types])
                     else:
                         col_defs = ', '.join(fields)
-                    log.notice('col_defs: {}'.format(col_defs))
+                    log.notice(f'col_defs: {col_defs}')
 
                     try:
                         sql_cols = ','.join('?' * len(fields))
                         fieldnames = ','.join(fields)
-                        sql_insert = 'INSERT INTO {} ({}) VALUES ({});' \
-                                     ''.format(table, fieldnames, sql_cols) 
+                        sql_insert = f'INSERT INTO {table} ({fieldnames}) VALUES ({sql_cols});'
                         dbcur = db.cursor()
 
                         rows = load_csv_data(filename, fields=fields, skip_rows=1,
