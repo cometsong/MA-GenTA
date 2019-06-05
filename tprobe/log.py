@@ -10,7 +10,7 @@ __author__ = 'Benjamin Leopold <bleopold@jax.org>'
 logbook.set_datetime_format('local')
 
 log_name = 'Targeted_Pipeline'
-log_level = 'INFO'
+show_level = 'INFO'
 log_level = 'DEBUG'
 
 # DEFAULT_FORMAT_STRING = ('[{record.time:%Y-%m-%d %H:%M:%S.%f%z}] '
@@ -35,12 +35,14 @@ def log_file_init(log_name=__name__, logfile=None):
     return logfile
 
 
-def log_init(name=__name__, level='NOTICE',  format_string=FORMAT_STRING, logfile=None):
+def log_init(name=__name__, level='NOTICE', show_level=None,
+             format_string=FORMAT_STRING, logfile=None):
     """Initialize a new Logger to file and colorized stderr stream"""
     logfile = log_file_init(log_name=name, logfile=logfile)
 
     file_handler = FileHandler(logfile, level=level, format_string=format_string, bubble=True)
-    cstd_handler = ColorizedStderrHandler(level=level, format_string=format_string, bubble=False)
+    show_level = show_level if show_level else level
+    cstd_handler = ColorizedStderrHandler(level=show_level, format_string=format_string, bubble=False)
 
     level = logbook.lookup_level(level)
 
@@ -51,5 +53,5 @@ def log_init(name=__name__, level='NOTICE',  format_string=FORMAT_STRING, logfil
     return logger
 
 
-log = log_init(name=log_name, level=log_level)
+log = log_init(name=log_name, level=log_level, show_level=show_level)
 
