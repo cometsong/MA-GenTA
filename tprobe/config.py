@@ -3,11 +3,9 @@ import os
 # Config options:
 import tomlkit
 from tomlkit.toml_file import TOMLFile
-from collections import OrderedDict as Ord
 
 from .log import log
 from .utils import write_out_file
-# from .abspath import AbsPath
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~

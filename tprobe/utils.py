@@ -2,11 +2,11 @@ import os
 import re
 import shutil
 import tempfile
-from pathlib import Path
 from subprocess import run, CalledProcessError, STDOUT, PIPE
 import csv
 
 from .log import log
+from .abspath import AbsPath as Path
 
 
 def pct_gc(seq, points=2):
