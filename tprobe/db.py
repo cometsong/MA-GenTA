@@ -236,21 +236,21 @@ class SqliteIO():
                         for row in rows:
                             row_values = list(row.values())
                             dbcur.execute( sql_insert, (row_values) )
-                            # log.notice('Inserted row {} into table "{}"'.format(dbcur.lastrowid, table))
-                        log.notice('Inserted {} rows into table "{}"'.format(dbcur.lastrowid, table))
+                            # log.notice(f'Inserted row {dbcur.lastrowid} into table "{table}"')
+                        log.notice(f'Inserted {dbcur.lastrowid} rows into table "{table}"')
                     except Exception as e:
-                        log.error('Importing records from file "{}": {}'.format(filename, e))
+                        log.error(f'Importing records from file "{filename}": {e}')
                         raise e
 
                     return # Success!!
                 else:
-                    log.error('Reading file "{}" has problems...'.format(filename))
+                    log.error(f'Reading file "{filename}" has problems...')
                     return None
         except sqlite3.Error as e:
-            log.error('Importing from file "{}" to db: {}'.format(filename, e))
+            log.error(f'Importing from file "{filename}" to db: {e}')
             raise e
         except Exception as e:
-            log.error('Importing from file "{}" to db: {}'.format(filename, e))
+            log.error(f'Importing from file "{filename}" to db: {e}')
             raise e
         finally:
             db.close()
