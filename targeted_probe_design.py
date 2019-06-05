@@ -1,7 +1,5 @@
 #!/usr/bin/env python3
 
-#TODO: cli parameters for pipe? config_file path? other config'able options?
-
 """ Targeted assay probe design pipeline steps
     About: Pipeline of all steps to be taken within targeted probe design.
     Authors: Benjamin Leopold, Jacqui Benjamino
@@ -15,7 +13,6 @@ import shutil
 import random
 
 # Config options:
-from collections import OrderedDict as Ord
 import tomlkit
 
 # pipeline-app modules
@@ -538,6 +535,7 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
 
 
 #~~~~~~~~~ Main Hub: Copy/Modify bin/prokka files, makeblastdb; loop gbins ~~~~~
+#TODO: Add config option "compress" for final compression of sqlite dbs (vacuum;) and blast csvs (gzip)
 def main_pipe(*, config_file:'c'=None, debug=False):
     """Execute the steps of the targeted probe design pipeline
     
