@@ -137,9 +137,9 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
         try:
             dst_fn = dest_dir / ffn.name
             dest_files.append(shutil.copyfile(ffn, dst_fn))
-            replace_spaces(dst_fn, '_')
             log.info('Prepending "{}" into sequence headers'.format(ffn.stem))
             sed_inplace(dst_fn, r'^>', '>{}_'.format(ffn.stem))
+            replace_spaces(dst_fn, '_')
         except IOError as e:
             log.error('IOError, copying "{}" to "{}": {}'.format(
                           e.filename, e.filename2, e))
@@ -376,7 +376,8 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         where_def = ' AND '.join(wheres) + trna_where_def
         group_def = '{} HAVING count({})=1'.format('qseqid', 'qseqid')
 
-        ddl_view = 'CREATE VIEW IF NOT EXISTS {} AS SELECT {} FROM {} WHERE {} GROUP BY {};' \
+        ddl_view = 'DROP VIEW IF EXISTS {};'.format(filter_view)
+        ddl_view = 'CREATE VIEW {} AS SELECT {} FROM {} WHERE {} GROUP BY {};' \
                    ''.format(filter_view, field_sql, table_name, where_def, group_def) 
         # log.debug('filtering view query: "{}"'.format(ddl_view))
         create_success = Sdb.exec_ddl(db, ddl_view)
@@ -452,6 +453,7 @@ def export_final_sets(dbname, cluster_id, final_probe_amount=1, randomly=True):
             write_out_file(probe_fasta, export_file, mode='a')
 
 
+#~~~ Generate/Process/Filter/Export Probe Sequences for Cluster Genome Bin ~~~~~
 def targeted_genome_bin_probes(genome_bin, blastdb=None):
     """Generate, process, filter and export probes for a cluster genome bin"""
     log.notice('Generating targeted probes for genome bin: {}'.format(genome_bin.name))
@@ -535,6 +537,7 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
                    'number of values({})!'.format(len(probe_fields), len(probe_blasts[0])))
 
 
+#~~~~~~~~~ Main Hub: Copy/Modify bin/prokka files, makeblastdb; loop gbins ~~~~~
 def main_pipe(*, config_file:'c'=None, debug=False):
     """Execute the steps of the targeted probe design pipeline
     
@@ -599,9 +602,9 @@ def main_pipe(*, config_file:'c'=None, debug=False):
                 raise e
 
         """Design probes for genome bin fastas"""
-        log.name = 'Targeted Pipeline'
         #TODO: run in parallel, use multiprocessing.Pool ??
         for gbin in gbin_dir.glob('*'+gbin_suff):
+            log.name = 'Targeted Pipeline'
             targeted_genome_bin_probes(gbin, blastdb=blast_all_clusters)
     except Exception as e:
         log.error('Error. {}'.format(e.args))
@@ -609,7 +612,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
 
     finally:
         log.name = 'Targeted Pipeline'
-        log.notice(f'''Completed generating targeted probes!
+        log.notice(f'''Completed this run of targeted probe pipeline!
                    \nConfig options used: {tomlkit.dumps(CONFIG)}''')
         if debug:
             log.notice(f'''\nDatabase Config options used: {tomlkit.dumps(DB_CFG)}''')
