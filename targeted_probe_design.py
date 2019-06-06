@@ -126,7 +126,7 @@ def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
     srce_dir = prokka_dir or APath(CONFIG.get('paths').get('prokka_dir'))
     dest_dir = dest_dir or APath(CONFIG.get('paths').get('working_dir'))
     log.info('Copying and processing Prokka ffn files '
-             'from {srce_dir} into {dest_dir}f')
+             'from {srce_dir} into {dest_dir}')
     dest_files = []
     assert next(srce_dir.glob('*'+suffix)), f'No matching files in the dir "{srce_dir.abspath}"'
     for ffn in srce_dir.glob('*'+suffix):
@@ -256,7 +256,7 @@ def blast_clust_probes_on_genome(probe_file, blastdb):
     """Run 'blastn' of cluster's probe fasta on genome blastdb.
     Note: probe_file be 'APath' instance, blastdb param is string of filename or filepath.
     """
-    log.info(f'Blasting cluster''s probes ({probe_file}) on genome db {blastdb}')
+    log.info(f'Blasting cluster\'s probes ({probe_file}) on genome db {blastdb}')
     try:
         blastn = CONFIG.get('APPS').get('blastn')
         dust   = CONFIG.get('blastn').get('dust', 'no')
@@ -364,16 +364,16 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
 
         wheres = [f'gc_pct between "{gc_min}" and "{gc_max}"',
                   'pident=100',
-                  f'length={probe_length}f',
-                  f'qseqid like "{cluster_id}%"f',
+                  f'length={probe_length}',
+                  f'qseqid like "{cluster_id}%"',
                   ] + trna_wheres
         where_def = ' AND '.join(wheres) + trna_where_def
         group_def = 'qseqid HAVING count(qseqid)=1'
 
         ddl_view = f'DROP VIEW IF EXISTS {filter_view};'
         ddl_view = (f'CREATE VIEW {filter_view} AS'
-                    f'SELECT {field_sql} FROM {table_name}'
-                    f'WHERE {where_def} GROUP BY {group_def};')
+                    f' SELECT {field_sql} FROM {table_name}'
+                    f' WHERE {where_def} GROUP BY {group_def};')
         # log.debug(f'filtering view query: "{ddl_view}"')
         create_success = Sdb.exec_ddl(db, ddl_view)
         return create_success
