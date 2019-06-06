@@ -206,7 +206,7 @@ class SqliteIO():
 
                 if os.path.isfile(filename):
                     field_datatypes = SqliteIO.get_csv_field_datatypes(filename, delim=delim)
-                    log.notice(f'length fields: {len(fields))}')
+                    log.notice(f'length fields: {len(fields)}')
                     if not fields:
                         fields = field_datatypes.keys()
                         log.notice(f'length fields: {len(fields)}')
