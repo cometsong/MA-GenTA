@@ -356,7 +356,7 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
 
         gc_min = CONFIG.get('gc_percent').get('min_percent')
         gc_max = CONFIG.get('gc_percent').get('max_percent')
-        probe_length = CONFIG.get('general').get('probe_length')
+        probe_length = CONFIG.get('catch').get('probe_length')
 
         trna_list = CONFIG.get('filters').get('trna_list')
         trna_wheres = [ f'sseqid NOT LIKE "%{t}%"' for t in trna_list ]

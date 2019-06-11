@@ -21,7 +21,6 @@ _DEFAULT_CONFIG_TOML = """
 [general]
     final_probe_amount = '20'
     final_probe_random = true
-    probe_length = '40'
     prokka_prediction_suffix = '.ffn'
     genome_bins_suffix = '.fasta'
 
