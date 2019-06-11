@@ -53,7 +53,7 @@ _DEFAULT_CONFIG_TOML = """
 
 [filters]
     # musicc_list contains expressions to match the annotation's sequence id's. Use any python.re regex characters or sets.
-    begin_regex = '[ _|\.]' # will be placed at beginning of musicc match pattern to account for some prokka files and blastdbs different space-replacements
+    begin_regex = '[- _|\.]' # will be placed at beginning of musicc match pattern to account for some prokka files and blastdbs different space-replacements
     musicc_list = [ 'asd', 'metK', 'pgk', 'adk', 'eno', 'tpiA', 'tyrS', 'trpS', 'thrS', 'leuS', 'ileS', 'alaS', 'valS', 'metG', 'serS', 'aspS', 'proS', 'cysS', 'argS', 'pheS', 'pheT', 'hisS', 'pyrG', 'tsf', 'infB', 'ksgA', 'nusA', 'nusG', 'prfA', 'frr', 'rpoA', 'secY', 'ffh', 'ftsY', 'mraW', 'rnhB', 'smpB', 'grpE', 'uvrB', 'ychF', 'pyrH', 'nth', 'rsmH', 'tRNA.ligase',]
     trna_list = [ '50S', '5S', '16S', '30S', '23S', 'tRNA-Ala', 'tRNA-Arg', 'tRNA-Asn', 'tRNA-Asp', 'tRNA-Cys', 'tRNA-Glu', 'tRNA-Gln', 'tRNA-Gly', 'tRNA-His', 'tRNA-Ile', 'tRNA-Leu', 'tRNA-Lys', 'tRNA-Met', 'tRNA-Phe', 'tRNA-Pro', 'tRNA-Ser', 'tRNA-Thr', 'tRNA-Trp', 'tRNA-Tyr', 'tRNA-val', 'repeat', 'hypothetical',]
 
