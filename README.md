@@ -46,8 +46,8 @@ Using a `virtualenv` is _highly_ recommended. :)
 ## Running Pipeline:
 
 #### Configure Your Variables
-* Modify the default [toml][] configuration file ([targeted_probe_config.toml][config])
-  _or_ make a new one to use on your system using the `clize` module.
+* Modify the default [toml][] configuration file ([targeted_probe_config.toml][config])  
+  _or_ copy to a new one to use on your system.
   - `[paths]`:  
     These paths can be relative to the folder you start the pipeline in, or
         absolute in the root filesystem.
@@ -67,7 +67,7 @@ Using a `virtualenv` is _highly_ recommended. :)
   - `[catch]`:
     * probe_length: how long resulting probes? (default 40)
     * probe_stride: how  many base pairs between probes? (default 20)
-    * reuse_existing_probe_files: re-use pre-existing results, e.g. a previous
+    * reuse_existing_probe_files: reuse preexisting results, e.g. a previous
         pipeline run failed (default false)
   - `[blastn]`:
     * evalue: for cutoff of blast resulting records (default '0.001')
@@ -90,9 +90,9 @@ Using a `virtualenv` is _highly_ recommended. :)
 #### Results
 The resulting files from each run of this pipeline will include:
 - fasta file containing sequences of filtered matching probes 
-- output of running `catch` with _coverage analysis_
+- tsv file with output of _coverage analysis_ from running `catch`
 - modified version of the prokka prediction file (header includes ffn name with
-    with spaces replaced by underscares)
+    with spaces replaced by underscores)
 - sqlite database with all matching probe info and sequences in a table, and
     a view of the probes filtered according to the _config_ file settings
 - a log file
@@ -117,7 +117,7 @@ All others can be reviewed, kept for records, gzip'd, or trashed as you see fit.
           ```
           [paths]
                genome_bins=/path/to/gbins/01  # example base numbered dirname
-               # or if splitting prokka annotaion files:
+               # or if splitting prokka annotation files:
                prokka_dir=/path/to/ffns/01
           ```
           saved with a filename like `n01.toml`.
@@ -134,7 +134,7 @@ All others can be reviewed, kept for records, gzip'd, or trashed as you see fit.
             > n$(printf "%0${#cur}d" $((D+1))).toml ;
           done
           ``` 
-          Setting the `cur` to the num in the _boilerplate_ filename, and the
+          Setting the `cur` to the number in the _boilerplate_ filename, and the
           `max` to the highest directory number. Any leading _zero_'s on the
           `cur` will be retained in the example above.
 
