@@ -9,10 +9,9 @@ from .utils import write_out_file
 
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Config Variables ~~~~~
-"""give all options default values, to be later customized in config file"""
+"""give all options default values, to be later customized in user config file"""
 DEFAULT_CONFIG_FILE = 'targeted_probe_config.toml'
 
-#TODO: specify file name lists (or globs) instead of [paths]??
 _DEFAULT_CONFIG_TOML = """
 #==============================================================================#
 #---------     Options for Steps in Targeted Probe Design Pipeline     --------#
@@ -21,6 +20,7 @@ _DEFAULT_CONFIG_TOML = """
 [general]
     final_probe_amount = '20'
     final_probe_random = true
+
     prokka_prediction_suffix = '.ffn'
     genome_bins_suffix = '.fasta'
 
@@ -98,8 +98,7 @@ blastn.fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
         'is_musicc',
     ]
 """
-DATABASE_CONFIG = tomlkit.parse(_DATABASE_CONFIG_TOML)
-DB_CFG = DATABASE_CONFIG
+DB_CFG = tomlkit.parse(_DATABASE_CONFIG_TOML)
 
 
 """init primary CONFIG dict using DEFAULT"""
