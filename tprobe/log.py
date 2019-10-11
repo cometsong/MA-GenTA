@@ -13,7 +13,7 @@ log_level = 'DEBUG'
 
 # DEFAULT_FORMAT_STRING = ('[{record.time:%Y-%m-%d %H:%M:%S.%f%z}] '
 #                          '{record.level_name}: {record.channel}: {record.message}')
-FORMAT_STRING = ('[{record.time:%Y%m%d-%H:%M:%S}]'
+FORMAT_STRING = ('[{record.time:%Y%m%d-%H%M%S}]'
                  ' {record.level_name:^7}:' # centered within 7
                  ' {record.channel}:' # channel = log.name
                  ' {record.message}'
@@ -25,7 +25,7 @@ def inject_extra_group(record):
 
 
 def log_file_init(log_name=__name__, logfile=None):
-    NOW = datetime.datetime.now().isoformat('T', 'seconds').replace(':','')
+    NOW = datetime.datetime.now().isoformat('T', 'seconds').replace(':','-')
     if not logfile:
         _puncts = string.punctuation.replace('_-','') # allow specific punctuation in Title
         logbase = log_name.replace(_puncts,'').replace(' ','')
