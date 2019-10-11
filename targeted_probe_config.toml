@@ -30,8 +30,10 @@
   num_alignments = '250' # Integer >1. (blastn default: 250)
   num_threads    = '2'   # how many cpus?
 
-  fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ] # plus others, e.g.: 'mismatch gapopen qstart qend sstart send evalue bitscore'
-  # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
+  # pre-defined fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
+  # The above fields are used in probe filtering and evaluating.
+  # Here you can a list of others to add, e.g.:
+  # fields = ['mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
 
 [filters]
   musicc_list = [

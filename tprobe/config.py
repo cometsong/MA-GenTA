@@ -47,8 +47,11 @@ _DEFAULT_CONFIG_TOML = """
     num_threads    = '2'   # how many cpus?
 
     outfmt         = '10'  # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
-    fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
-    # fields: The first 5 fields are significant, as some are used in later filtering and evaluating! Feel free to add others, but take care in any deletions!
+
+    # pre-defined fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
+    # The above fields are used in probe filtering and evaluating.
+    # Here you can a list of others to add, e.g.:
+    # fields = ['mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
 
 [filters]
     # musicc_list contains expressions to match the annotation's sequence id's. Use any python.re regex characters or sets.
