@@ -119,7 +119,8 @@ def check_options():
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Prep BlastDB for Prokka Annotations ~~~~~
 def get_metagenome_cluster_prokka(prokka_dir=None, dest_dir=None, suffix='ffn'):
     """copy all cluster 'ffn' files from remote directory.
-    Then replace all spaces in lines with underscores '_'
+    Then prepend file name on froent of header lines,
+    and replace all spaces in lines with underscores '_'
     Note: *_dir args should be 'APath' instances
     """
     #TODO: ensure all files named after their cluster (w/o _,-..?) !!
