@@ -104,6 +104,21 @@ blastn.fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
 """
 DB_CFG = tomlkit.parse(_DATABASE_CONFIG_TOML)
 
+"""Globs of all intermediate files created in this pipeline."""
+# Some of these are fullnames, some used as suffixes
+# This is "master list" with keys used in 'keep_files' below.
+TMP_FILE_GLOBS = dict(
+    annotation_mods = '', # track list of files
+    catch_probes = '', # track list of files
+    blast_db = DB_CFG.get('blastdb').get('name'),
+    target_dbs = DB_CFG.get('clusterdb').get('name'),
+    blast_csv = 'probes.blasts.csv',
+    catch_coverage = 'probe_coverage_analysis.tsv',
+)
+# and here go the keeeeys...
+DEFAULT_CONFIG['general']['keep_files'] = list(TMP_FILE_GLOBS.keys())
+DEFAULT_CONFIG['general']['compress_files'] = True
+
 
 """init primary CONFIG dict using DEFAULT"""
 CONFIG = DEFAULT_CONFIG.copy()

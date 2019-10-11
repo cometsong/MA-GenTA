@@ -47,6 +47,7 @@ def log_init(name=__name__, level='NOTICE', show_level=None,
     logger = Logger(name, level=level)
     logger.handlers.append(file_handler)
     logger.handlers.append(cstd_handler)
+    logger.filename = logfile
 
     return logger
 

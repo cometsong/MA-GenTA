@@ -4,6 +4,7 @@ import shutil
 import tempfile
 from subprocess import run, CalledProcessError, STDOUT, PIPE
 import csv
+import gzip
 
 from .log import log
 from .abspath import AbsPath as Path
@@ -108,7 +109,7 @@ def run_cmd(cmd, only_stdout=False):
     """
     try:
         if cmd:
-            log.info(f'Running subprocess cmd "{cmd}"')
+            log.debug(f'Running subprocess cmd "{cmd}"')
             output = run(cmd,
                          check=True,
                          stdout=PIPE,
@@ -271,4 +272,62 @@ def write_out_file(contents, filename, mode='w'):
         return None
     else:
         return filename
+
+
+def gzip_compress(file_in, file_out=None, rm_file_in=True):
+    """gzip 'file_in', optionally remove it, return filename of file_out."""
+    try:
+        if not file_out:
+            file_out = '.'.join([file_in, 'gz'])
+        with open(file_in, 'rb') as fh_in:
+            with gzip.open(file_out, 'wb') as fh_out:
+                shutil.copyfileobj(fh_in, fh_out)
+        if os.access(file_out, os.W_OK) and rm_file_in:
+            os.remove(file_in)
+    except Exception as e:
+        log.error(f'Error: {e}')
+        raise e
+    else:
+        return file_out
+
+
+def tidy_up_files(fileglob, fdir=None, keep=True, compress=True):
+    """Tidy up the files: either remove or compress them.
+    This will only remove/compress files, not directoroes.
+
+    :param fileglob: expected to be relative to dir e.g. "*.log"
+        OR an explicit path (sans '*')
+        OR a list of explicit paths relative to fdir
+    :param fdir: current dir if not passed
+    :param keep: don't remove them
+    :param compress: if keeping, compress the files using gzip
+    """
+    try:
+        if not fdir:
+            fdir = os.getcwd()
+
+        if '*' in fileglob:
+            filelist = Path(fdir).glob(fileglob)
+        elif type(fileglob) in [list, tuple]:
+            filelist = [Path(fdir)/fh for fh in fileglob]
+        else: # single, explicit str
+            filelist = Path(fdir)/fileglob
+
+        output = []
+        if not keep:
+            for fh in filelist:
+                cmd = ['rm','-f', fh.abspath]
+                output.append(run_cmd(cmd))
+            return output
+        elif compress:
+            for fh in filelist:
+                output.append(gzip_compress(fh.abspath))
+    except ValueError as e:
+        log.error(f'ValueError tidying files (bad glob?): {e}')
+    except Exception as e:
+        log.error(f'Error tidying files: {e}')
+        raise e
+    else:
+        log.debug(f'Tidied up files matching "{fileglob}"')
+        return output
 

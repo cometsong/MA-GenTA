@@ -18,6 +18,7 @@ import tomlkit
 # pipeline-app modules
 from tprobe import (
     log,
+    config,
     CONFIG, DB_CFG,
     read_config_file,
     SqliteIO as Sdb,
@@ -30,6 +31,8 @@ from tprobe.utils import (
     replace_spaces,
     sed_inplace,
     concatenate_files,
+    tidy_up_files,
+    gzip_compress,
     write_out_csv,
     write_out_file,
 )
@@ -532,13 +535,77 @@ def targeted_genome_bin_probes(genome_bin, blastdb=None):
     else:
         log.notice(f'Number of fieldnames({len(probe_fields)}) not equal to'
                    f'number of values({len(probe_blasts[0])})!')
+    return probes_file
+
+
+def finalize_outfiles(working_dir='', blastdb=None, annots=[], probes=[]):
+    """Check CONFIG settings, delete or compress the intermediate files, then compress logs.
+
+    :param working_dir: string of path to work in
+    :param blastdb: name of blastdb created
+    :param annote: list of modified annotation/prediction files
+    :param probes: list of intial probe fastas created by 'catch'
+    """
+    log.name = 'Finalizing'
+    if not working_dir:
+        working_dir = os.cwd()
+
+    keepers = CONFIG.get('general').get('keep_files').copy()
+    compress = CONFIG.get('general').get('compress_files')
+    file_globs = config.TMP_FILE_GLOBS.copy()
+
+    # special cases of files tracked without 
+    argfiles =dict(
+        blast_db = blastdb,
+        annotation_mods = [p.abspath for p in annots],
+        catch_probes = [p.abspath for p in probes],
+    )
+
+    if CONFIG.get('paths').get('use_blastdb', None):
+        try:
+            log.info('Keeping blastdb')
+            for ftype in ['blast_db', 'annotation_mods']:
+                file_globs.pop(ftype)
+                argfiles.pop(ftype)
+        except ValueError as e:
+            log.error(e)
+
+    for ftype, flist in argfiles.items():
+        try:
+            if ftype in keepers:
+                log.info(f'Tidying up {ftype}')
+                file_globs.pop(ftype)
+                tidy_up_files(flist, working_dir, True, compress)
+        except Exception:
+            pass
+
+    if 'target_dbs' in keepers:
+        db_name = file_globs.get('target_dbs')
+        dbs_glob = '_'.join(['*', db_name])
+        try:
+            log.info('Vacuuming databases')
+            for db in APath(working_dir).glob(dbs_glob):
+                Sdb.exec_ddl(db.abspath, 'VACUUM;')
+                log.debug(f'Vacuumed database: {db}')
+        except Exception:
+            pass
+
+    for k, glb in file_globs.items():
+        log.info(f'Tidying up {k}')
+        glob = ''.join(['*', glb]) if glb else argfiles[k]
+        if k in keepers:
+            tidy_up_files(glob, working_dir, True, compress)
+        else:
+            tidy_up_files(glob, working_dir, keep=False)
+
+    # ...and finally compress the logfile
+    gzip_compress(log.filename)
 
 
 #~~~~~~~~~ Main Hub: Copy/Modify bin/prokka files, makeblastdb; loop gbins ~~~~~
-#TODO: Add config option "compress" for final compression of sqlite dbs (vacuum;) and blast csvs (gzip)
 def main_pipe(*, config_file:'c'=None, debug=False):
     """Execute the steps of the targeted probe design pipeline
-    
+
     :param config_file: non-default TOML configuration file to set modified options.
     :param debug: show internal debugging messages and configuration.
     """
@@ -572,6 +639,7 @@ def main_pipe(*, config_file:'c'=None, debug=False):
                 with use_blastdb_path.resolve(strict=True):
                     log.info(f'Using pre-existing blastdb: {use_blastdb_path.abspath}')
                     blast_all_clusters = use_blastdb_path.abspath
+                prokka_files = [] # for final cleanup
             except Exception as e:
                 log.error(f'Unable to use pre-existing blastdb: {use_blastdb}')
                 raise e
@@ -600,19 +668,27 @@ def main_pipe(*, config_file:'c'=None, debug=False):
 
         """Design probes for genome bin fastas"""
         #TODO: run in parallel, use multiprocessing.Pool ??
+        probe_fastas = []
         for gbin in gbin_dir.glob('*'+gbin_suff):
             log.name = 'Targeted Pipeline'
-            targeted_genome_bin_probes(gbin, blastdb=blast_all_clusters)
+            probe_file = targeted_genome_bin_probes(gbin, blastdb=blast_all_clusters)
+            probe_fastas.append(probe_file)
     except Exception as e:
         log.error(f'Error. {e.args}')
         raise e
 
-    finally:
+    else:
         log.name = 'Targeted Pipeline'
         log.notice(f'''Completed this run of targeted probe pipeline!
                    \nConfig options used: {tomlkit.dumps(CONFIG)}''')
         if debug:
             log.notice(f'''\nDatabase Config options used: {tomlkit.dumps(DB_CFG)}''')
+
+        log.info('Finalize by tidying up intermediate files.')
+        finalize_outfiles(working_dir,
+                          blastdb=blastdb_name,
+                          annots=prokka_files,
+                          probes=probe_fastas)
 
 
 if __name__ == '__main__':
