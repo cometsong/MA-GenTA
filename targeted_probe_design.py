@@ -41,7 +41,6 @@ try:
     """parse all incoming command line args"""
     from clize import run
 except ImportError:
-    log.notice('Using default configuration. (Module "clize" not installed to read command line.)')
     run = lambda *args: main_pipe()
 
 __author__ = 'Benjamin Leopold'
@@ -613,12 +612,19 @@ def main_pipe(*, config_file:'c'=None, debug=False):
         log.name = 'Targeted_Pipeline'
         log.info('Beginning execution of the targeted design probe pipeline.')
 
+        if debug:
+            log.level_name = 'DEBUG'
+            for lh in log.handlers:
+                lh.level_name = 'DEBUG'
+
         if config_file:
             log.name = 'Targeted:Read Config Options'
             user_cfg = read_config_file(config_file)
             for k in CONFIG:
                 if k in user_cfg:
                     CONFIG[k].update(user_cfg[k])
+        else:
+            log.notice('Using default configuration. (Install module "clize" for command args.)')
 
         log.name = 'Targeted:Check Config Options'
         check_options()
