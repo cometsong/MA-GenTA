@@ -548,7 +548,6 @@ def main_pipe(*, config_file:'c'=None, debug=False):
 
         if config_file:
             log.name = 'Targeted:Read Config Options'
-            # CONFIG.update(read_config_file(config_file))
             user_cfg = read_config_file(config_file)
             for k in CONFIG:
                 if k in user_cfg:
