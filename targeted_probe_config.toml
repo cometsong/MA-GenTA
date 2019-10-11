@@ -36,6 +36,7 @@
   # fields = ['mismatch', 'gapopen', 'qstart', 'qend', 'sstart', 'send', 'evalue', 'bitscore']
 
 [filters]
+  pct_identity = '100'
   musicc_list = [
     'asd', 'metK', 'pgk', 'adk', 'eno', 'tpiA', 'tyrS', 'trpS',
     'thrS', 'leuS', 'ileS', 'alaS', 'valS', 'metG', 'serS',

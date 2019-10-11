@@ -339,7 +339,7 @@ def import_blasts_to_db(blast_hit_list, db_name=None, table_name=None):
 def filter_probe_seqs(dbname, cluster_id, table_name=None):
     """Create db view onto blast results table, limiting on (below default values):
         - dupes
-        - =100%
+        - pct_identity
         - within GC min>max
         - =40bp length
         - hit on this clust
@@ -358,13 +358,14 @@ def filter_probe_seqs(dbname, cluster_id, table_name=None):
         gc_min = CONFIG.get('gc_percent').get('min_percent')
         gc_max = CONFIG.get('gc_percent').get('max_percent')
         probe_length = CONFIG.get('catch').get('probe_length')
+        pct_identity = CONFIG.get('filters').get('pct_identity')
 
         trna_list = CONFIG.get('filters').get('trna_list')
         trna_wheres = [ f'sseqid NOT LIKE "%{t}%"' for t in trna_list ]
         trna_where_def = ' AND ('+ ' AND '.join(trna_wheres) +')'
 
         wheres = [f'gc_pct between "{gc_min}" and "{gc_max}"',
-                  'pident=100',
+                  f'pident={pct_identity}',
                   f'length={probe_length}',
                   f'qseqid like "{cluster_id}%"',
                   ] + trna_wheres
