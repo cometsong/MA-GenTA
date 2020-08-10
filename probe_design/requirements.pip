@@ -1,0 +1,15 @@
+tomlkit
+gffutils
+logbook
+
+# command-line args
+clize
+
+# devel
+catch
+jedi
+ptpython
+
+# testing
+pytest
+
