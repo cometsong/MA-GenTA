@@ -47,6 +47,7 @@ _DEFAULT_CONFIG_TOML = """
     num_threads    = '2'   # how many cpus?
 
     outfmt         = '10'  # 10 = csv w/o header lines. This format is used by the pipeline.  'nuf said.
+    fields = []
 
     # pre-defined fields = [ 'qseqid', 'sseqid', 'pident', 'length', 'qseq' ]
     # The above fields are used in probe filtering and evaluating.
