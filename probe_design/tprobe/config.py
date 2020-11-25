@@ -62,7 +62,7 @@ _DEFAULT_CONFIG_TOML = """
 
 [APPS]
     # Use only the main executable name if they are in your $PATH env! e.g. load the required 'module's before running this pipeline.
-    catch    = 'catch_design.py'
+    catch    = 'design.py'
     blastdb  = 'makeblastdb'
     blastn   = 'blastn'
 """
